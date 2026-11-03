@@ -1,14 +1,4 @@
-﻿name: Deploy Laravel App to AWS EC2
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-﻿name: Deploy Laravel App to AWS EC2
+name: Deploy Laravel App to AWS EC2
 
 on:
   push:
@@ -21,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
@@ -31,10 +21,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/mi-app
-            
+
             # Si el repo no existe aún en el servidor, clónalo
             if [ ! -d ".git" ]; then
-              git clone https://github.com/jtoledom1/mi_cicd_laravelapp.git 
+              git clone https://github.com/jtoledom1/mi_cicd_laravelapp.git .
             else
               git pull origin main
             fi
@@ -52,40 +42,5 @@ jobs:
             php artisan route:cache
             php artisan view:cache
 
-            # Reiniciar servicios si es necesario
-            sudo systemctl restart php8.3-fpm
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Deploy to EC2 via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /var/www/mi-app
-            
-            # Si el repo no existe aún en el servidor, clónalo
-            if [ ! -d ".git" ]; then
-              git clone https://github.com/TU_USUARIO/TU_REPOSITTORIO.git .
-            else
-              git pull origin main
-            fi
-
-            # Instalar/actualizar dependencias
-            composer install --no-dev --optimize-autoloader
-
-            # Configurar permisos en storage y cache
-            sudo chown -R ubuntu:www-data storage bootstrap/cache
-            sudo chmod -R 775 storage bootstrap/cache
-
-            # Ejecutar migraciones y optimizar caches de Laravel
-            php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-
-            # Reiniciar servicios si es necesario
+            # Reiniciar servicios
             sudo systemctl restart php8.3-fpm
