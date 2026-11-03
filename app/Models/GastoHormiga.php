@@ -1,0 +1,77 @@
+<?php
+
+namespace App\Models;
+
+use Database\Factories\GastoHormigaFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class GastoHormiga extends Model
+{
+    /** @use HasFactory<GastoHormigaFactory> */
+    use HasFactory;
+
+    /**
+     * Categorías disponibles para clasificar un gasto hormiga.
+     *
+     * @var list<string>
+     */
+    public const CATEGORIAS = ['Café', 'Antojo', 'Transporte', 'Botana', 'Suscripción', 'Otro'];
+
+    /**
+     * Nombre de la tabla asociada al modelo.
+     *
+     * @var string
+     */
+    protected $table = 'gastos_hormiga';
+
+    /**
+     * Atributos que se pueden asignar de forma masiva.
+     *
+     * @var list<string>
+     */
+    protected $fillable = ['descripcion', 'monto', 'categoria', 'fecha', 'notas'];
+
+    /**
+     * Atributos que deben convertirse a tipos nativos.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'fecha' => 'date',
+            'monto' => 'decimal:2',
+        ];
+    }
+
+    /**
+     * Filtra los gastos que pertenecen a un mes con formato "YYYY-MM".
+     *
+     * @param  Builder<GastoHormiga>  $query
+     * @return Builder<GastoHormiga>
+     */
+    public function scopeDelMes(Builder $query, string $mes): Builder
+    {
+        $partes = explode('-', trim($mes));
+
+        if (count($partes) !== 2 || ! ctype_digit($partes[0]) || ! ctype_digit($partes[1])) {
+            return $query;
+        }
+
+        return $query
+            ->whereYear('fecha', (int) $partes[0])
+            ->whereMonth('fecha', (int) $partes[1]);
+    }
+
+    /**
+     * Devuelve la categoría del gasto o "Otro" cuando no es una categoría válida.
+     */
+    public function etiquetaCategoria(): string
+    {
+        $categoria = trim((string) $this->categoria);
+
+        return in_array($categoria, self::CATEGORIAS, true) ? $categoria : 'Otro';
+    }
+}

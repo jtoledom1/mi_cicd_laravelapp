@@ -1,0 +1,1582 @@
+/* ==========================================================================
+   Gastos Hormiga — hoja de estilos única
+   --------------------------------------------------------------------------
+   Paleta "jamaica y jade":
+     #0E3B36  pino     tinta, montos y bloques del rastro
+     #F2F4EC  cal      fondo de papel frío, verdoso (no crema)
+     #DFE8DC  verdín   descansos, avisos y rieles
+     #B5134F  jamaica  acento principal, acción y foco
+     #E3B23C  maíz     acento secundario, cifras del rastro
+     #4A5F58  humo     texto secundario
+
+   El color viene de un puesto de mercado (agua de jamaica, hoja de maíz,
+   jade), no del tablero financiero de siempre: el dinero chico se anota en
+   una libreta, no en un dashboard.
+
+   Tipografía, dos familias:
+     Bricolage Grotesque (display) — grotesca variable con irregularidades
+       de imprenta; sus cifras anchas le dan peso al total sin sonar a banco.
+     Atkinson Hyperlegible (texto) — dibujada para distinguir 1 / l / I y
+       leer cifras pequeñas; aquí las fechas y los montos no se confunden.
+
+   Sin fuentes de iconos ni imágenes externas: la única figura es el rastro
+   de bloques que representa la suma de los gastos.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Tokens
+   -------------------------------------------------------------------------- */
+:root {
+    --cal: #F2F4EC;
+    --blanco: #FBFCF7;
+    --verdin: #DFE8DC;
+    --linea: #CBD6C8;
+    --linea-fuerte: #A6B7A8;
+    --borde-control: #6B7F75;
+    --pino: #0E3B36;
+    --pino-raya: #2E574F;
+    --humo: #4A5F58;
+    --jamaica: #B5134F;
+    --jamaica-hondo: #8C0D3C;
+    --jamaica-tenue: #F7E4E9;
+    --maiz: #E3B23C;
+    --maiz-hondo: #8A6516;
+
+    --radio: 3px;
+    --ancho: 1144px;
+    --pagina: clamp(16px, 4vw, 32px);
+
+    --fuente-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+    --fuente-texto: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+
+    --transicion: 150ms ease;
+}
+
+/* --------------------------------------------------------------------------
+   2. Base
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    background: var(--cal);
+    color: var(--pino);
+    font-family: var(--fuente-texto);
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+figure {
+    margin: 0;
+}
+
+ul {
+    margin: 0;
+}
+
+a {
+    color: var(--pino);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+a:hover {
+    color: var(--jamaica);
+}
+
+svg {
+    display: block;
+    max-width: 100%;
+}
+
+button {
+    font: inherit;
+    color: inherit;
+}
+
+::selection {
+    background: var(--maiz);
+    color: var(--pino);
+}
+
+#contenido:focus {
+    outline: none;
+}
+
+/* Foco de teclado: el mismo anillo en todo lo interactivo. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+    outline: 3px solid var(--jamaica);
+    outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   3. Utilidades y armazón
+   -------------------------------------------------------------------------- */
+.oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.envoltura {
+    width: 100%;
+    max-width: var(--ancho);
+    margin-inline: auto;
+    padding-inline: var(--pagina);
+}
+
+.principal {
+    padding-block: 22px 76px;
+}
+
+.salto {
+    position: absolute;
+    top: -80px;
+    left: 16px;
+    z-index: 30;
+    padding: 10px 14px;
+    background: var(--pino);
+    color: var(--cal);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 0 0 var(--radio) var(--radio);
+    transition: top var(--transicion);
+}
+
+.salto:focus {
+    top: 0;
+    color: var(--cal);
+}
+
+/* --------------------------------------------------------------------------
+   4. Cabecera
+   -------------------------------------------------------------------------- */
+.cabecera {
+    border-bottom: 1px solid var(--linea);
+}
+
+.cabecera__interior {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 18px;
+    padding-block: 14px;
+}
+
+.marca {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--pino);
+    text-decoration: none;
+}
+
+.marca__icono {
+    flex: none;
+    color: var(--jamaica);
+}
+
+.marca__texto {
+    font-family: var(--fuente-display);
+    font-size: 1.18rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.025em;
+}
+
+.marca:hover .marca__texto {
+    color: var(--jamaica);
+}
+
+.cabecera__nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-left: auto;
+}
+
+/* --------------------------------------------------------------------------
+   5. Botones y enlaces de acción
+   -------------------------------------------------------------------------- */
+.boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 10px 16px;
+    border: 1.5px solid transparent;
+    border-radius: var(--radio);
+    font-family: var(--fuente-texto);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color var(--transicion), border-color var(--transicion), color var(--transicion);
+}
+
+.boton--lleno {
+    background: var(--jamaica);
+    border-color: var(--jamaica);
+    color: #FFF7F2;
+}
+
+.boton--lleno:hover {
+    background: var(--jamaica-hondo);
+    border-color: var(--jamaica-hondo);
+    color: #FFFFFF;
+}
+
+.boton--lleno:active {
+    background: #770B33;
+}
+
+.boton--lleno:focus-visible {
+    outline-color: var(--pino);
+    outline-offset: 3px;
+}
+
+.boton--fantasma {
+    background: transparent;
+    border-color: var(--borde-control);
+    color: var(--pino);
+}
+
+.boton--fantasma:hover {
+    background: var(--verdin);
+    border-color: var(--pino);
+    color: var(--pino);
+}
+
+.boton--peligro {
+    background: transparent;
+    border-color: var(--jamaica);
+    color: var(--jamaica-hondo);
+}
+
+.boton--peligro:hover {
+    background: var(--jamaica);
+    border-color: var(--jamaica);
+    color: #FFF7F2;
+}
+
+.boton--peligro:focus-visible {
+    outline-color: var(--pino);
+    outline-offset: 3px;
+}
+
+.volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 18px;
+    color: var(--humo);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.volver:hover {
+    color: var(--jamaica);
+}
+
+/* --------------------------------------------------------------------------
+   6. Aviso de confirmación
+   -------------------------------------------------------------------------- */
+.aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 24px 0 0;
+    padding: 12px 14px;
+    background: var(--verdin);
+    border-left: 4px solid var(--pino);
+}
+
+.aviso__icono {
+    flex: none;
+    margin-top: 2px;
+    color: var(--pino);
+}
+
+.aviso__texto {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   7. Filtros
+   -------------------------------------------------------------------------- */
+.filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 14px 16px;
+    margin-top: 26px;
+}
+
+.filtros__campo {
+    display: grid;
+    flex: 1 1 150px;
+    gap: 5px;
+    max-width: 220px;
+}
+
+.filtros__etiqueta {
+    color: var(--humo);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.filtros__control {
+    width: 100%;
+    min-height: 42px;
+    padding: 8px 10px;
+    background: var(--blanco);
+    border: 1.5px solid var(--borde-control);
+    border-radius: 2px;
+    color: var(--pino);
+    font-family: var(--fuente-texto);
+    font-size: 1rem;
+}
+
+.filtros__control:hover {
+    border-color: var(--humo);
+}
+
+.filtros__control:focus-visible {
+    border-color: var(--pino);
+}
+
+.filtros__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    margin-left: auto;
+}
+
+.filtros__limpiar {
+    color: var(--humo);
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.filtros__limpiar:hover {
+    color: var(--jamaica);
+}
+
+/* --------------------------------------------------------------------------
+   8. Resumen del mes
+   -------------------------------------------------------------------------- */
+.resumen {
+    margin-top: 12px;
+    padding-top: 16px;
+    border-top: 3px solid var(--pino);
+}
+
+.resumen__titulo {
+    color: var(--humo);
+    font-family: var(--fuente-display);
+    font-size: clamp(1rem, 1.4vw, 1.1rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.resumen__total {
+    margin: 4px 0 12px;
+    font-family: var(--fuente-display);
+    font-size: clamp(2.9rem, 8.5vw, 4.6rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 0.94;
+}
+
+.resumen__frase {
+    max-width: 48ch;
+    color: var(--humo);
+    font-size: 1.06rem;
+    line-height: 1.5;
+}
+
+.resumen__frase strong {
+    color: var(--pino);
+    font-weight: 700;
+}
+
+.resumen__datos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px 24px;
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px solid var(--linea);
+}
+
+.dato__etiqueta {
+    color: var(--humo);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.dato__valor {
+    margin-top: 2px;
+    font-family: var(--fuente-display);
+    font-size: 1.3rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+/* --------------------------------------------------------------------------
+   9. Rastro de hormigas
+   -------------------------------------------------------------------------- */
+.titulo-seccion {
+    font-family: var(--fuente-display);
+    font-size: clamp(1.3rem, 2.6vw, 1.55rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+}
+
+.rastro-seccion {
+    margin-top: 42px;
+}
+
+.rastro-seccion__cabeza {
+    display: grid;
+    gap: 6px;
+}
+
+.rastro-seccion__nota {
+    max-width: 64ch;
+    color: var(--humo);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.rastro {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 158px;
+    margin-top: 10px;
+    padding-top: 88px;
+    border-bottom: 1.5px solid var(--linea-fuerte);
+}
+
+.rastro__pieza {
+    position: relative;
+    flex-grow: var(--peso, 1);
+    flex-shrink: 1;
+    flex-basis: 0%;
+    min-width: 8px;
+    height: 68px;
+    background-color: var(--pino);
+    background-image:
+        repeating-linear-gradient(90deg, transparent 0 5px, var(--pino-raya) 5px 6px),
+        repeating-linear-gradient(180deg, transparent 0 11px, var(--pino-raya) 11px 12px);
+    border-radius: 2px 2px 0 0;
+    transform-origin: bottom center;
+    animation: rastro-entra 520ms cubic-bezier(0.2, 0.75, 0.25, 1) backwards;
+    animation-delay: calc(110ms + var(--i, 0) * 22ms);
+    transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.rastro__pieza:hover,
+.rastro__pieza:focus-visible {
+    background-color: var(--jamaica);
+    background-image: none;
+    transform: translateY(-6px);
+}
+
+.rastro__globo {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    z-index: 3;
+    display: grid;
+    gap: 1px;
+    width: max-content;
+    max-width: 210px;
+    padding: 7px 10px;
+    background: var(--pino);
+    border-radius: var(--radio);
+    color: var(--cal);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%);
+    transition: opacity 140ms ease, visibility 140ms ease;
+    pointer-events: none;
+}
+
+.rastro__pieza:hover .rastro__globo,
+.rastro__pieza:focus-visible .rastro__globo {
+    opacity: 1;
+    visibility: visible;
+}
+
+.rastro__globo::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--pino);
+}
+
+.rastro__globo-monto {
+    color: var(--maiz);
+    font-family: var(--fuente-display);
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.rastro__globo-desc {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.rastro__globo-cat {
+    color: #A8C3B9;
+    font-size: 0.72rem;
+    line-height: 1.2;
+}
+
+/* Globos de los extremos: se anclan al borde para no salirse de la tira. */
+.rastro__pieza:nth-child(-n + 3) .rastro__globo {
+    left: 0;
+    transform: none;
+}
+
+.rastro__pieza:nth-child(-n + 3) .rastro__globo::after {
+    left: 14px;
+    transform: none;
+}
+
+.rastro__pieza:nth-last-child(-n + 3) .rastro__globo {
+    right: 0;
+    left: auto;
+    transform: none;
+}
+
+.rastro__pieza:nth-last-child(-n + 3) .rastro__globo::after {
+    right: 14px;
+    left: auto;
+    transform: none;
+}
+
+.rastro__eje {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    color: var(--humo);
+    font-size: 0.8rem;
+}
+
+.rastro__eje-fecha {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.rastro__eje-linea {
+    flex: 1;
+    height: 1px;
+    background-image: repeating-linear-gradient(90deg, var(--linea-fuerte) 0 3px, transparent 3px 8px);
+}
+
+@keyframes rastro-entra {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scaleY(0.7);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scaleY(1);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   10. Reparto por categoría
+   -------------------------------------------------------------------------- */
+.categorias {
+    margin-top: 46px;
+}
+
+.categorias__lista {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 40px;
+    margin-top: 18px;
+    padding: 0;
+    list-style: none;
+}
+
+.categorias__fila {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto;
+    grid-template-areas:
+        "punto nombre monto"
+        "barra barra barra";
+    align-items: center;
+    column-gap: 9px;
+    row-gap: 7px;
+}
+
+.categorias__punto {
+    grid-area: punto;
+    width: 10px;
+    height: 10px;
+    border-radius: 1px;
+}
+
+.categorias__nombre {
+    grid-area: nombre;
+    font-size: 0.97rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.categorias__monto {
+    grid-area: monto;
+    font-family: var(--fuente-display);
+    font-size: 0.98rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.categorias__parte {
+    margin-left: 5px;
+    color: var(--humo);
+    font-family: var(--fuente-texto);
+    font-size: 0.74rem;
+    font-weight: 400;
+}
+
+.categorias__barra {
+    grid-area: barra;
+    display: block;
+    height: 5px;
+    overflow: hidden;
+    background: var(--verdin);
+}
+
+.categorias__barra-relleno {
+    display: block;
+    height: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   11. Lista de gastos (tabla en escritorio, filas apiladas en móvil)
+   -------------------------------------------------------------------------- */
+.lista-gastos {
+    margin-top: 46px;
+}
+
+.lista-gastos__cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 18px;
+    padding-bottom: 13px;
+    border-bottom: 1.5px solid var(--linea-fuerte);
+}
+
+.lista-gastos__cuenta {
+    color: var(--humo);
+    font-size: 0.88rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.tabla-gastos {
+    width: 100%;
+    margin-top: 4px;
+    border-collapse: collapse;
+}
+
+.tabla-gastos th {
+    padding: 12px 12px 9px;
+    border-bottom: 1px solid var(--linea);
+    color: var(--humo);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: left;
+}
+
+.tabla-gastos th.celda--monto {
+    text-align: right;
+}
+
+.tabla-gastos th:first-child,
+.tabla-gastos td:first-child {
+    padding-left: 0;
+}
+
+.tabla-gastos th:last-child,
+.tabla-gastos td:last-child {
+    padding-right: 0;
+}
+
+.tabla-gastos__fila {
+    border-bottom: 1px solid var(--linea);
+    transition: background-color 140ms ease;
+}
+
+.tabla-gastos__fila:hover {
+    background: #E9EFE3;
+}
+
+.tabla-gastos__celda {
+    padding: 14px 12px;
+    vertical-align: top;
+}
+
+.celda--fecha {
+    padding-top: 16px;
+    color: var(--humo);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.gasto__descripcion {
+    display: block;
+    font-weight: 700;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.gasto__nota {
+    display: block;
+    max-width: 46ch;
+    margin-top: 2px;
+    color: var(--humo);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.gasto__categoria {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--humo);
+    font-size: 0.9rem;
+}
+
+.gasto__punto {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 1px;
+}
+
+.celda--monto {
+    padding-top: 13px;
+    font-family: var(--fuente-display);
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.celda--acciones {
+    padding-top: 14px;
+    text-align: right;
+}
+
+.acciones-fila {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+}
+
+.accion {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--pino);
+    cursor: pointer;
+    font-family: var(--fuente-texto);
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.accion:hover {
+    color: var(--jamaica);
+}
+
+.accion--borrar {
+    color: var(--jamaica-hondo);
+}
+
+.accion--borrar:hover {
+    color: var(--jamaica);
+}
+
+.accion-form {
+    display: inline;
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   12. Paginación
+   -------------------------------------------------------------------------- */
+.paginacion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top: 1px solid var(--linea);
+}
+
+.paginacion__enlace {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 2px;
+    color: var(--pino);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.paginacion__enlace:hover {
+    color: var(--jamaica);
+}
+
+.paginacion__enlace--inactivo {
+    color: var(--humo);
+    cursor: default;
+    opacity: 0.6;
+    text-decoration: none;
+}
+
+.paginacion__cuenta {
+    color: var(--humo);
+    font-size: 0.88rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   13. Estado vacío
+   -------------------------------------------------------------------------- */
+.vacio {
+    max-width: 720px;
+    margin-top: 40px;
+    padding: clamp(20px, 4vw, 34px);
+    background: var(--verdin);
+    border: 1.5px dashed var(--linea-fuerte);
+    border-radius: 2px;
+}
+
+.vacio__icono {
+    color: var(--pino);
+    opacity: 0.6;
+}
+
+.vacio__titulo {
+    margin: 14px 0 8px;
+    font-family: var(--fuente-display);
+    font-size: clamp(1.4rem, 3.4vw, 1.8rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+}
+
+.vacio__texto {
+    max-width: 46ch;
+    margin-bottom: 20px;
+    color: var(--humo);
+}
+
+/* --------------------------------------------------------------------------
+   14. Páginas de formulario
+   -------------------------------------------------------------------------- */
+.pagina-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    align-items: start;
+    gap: clamp(28px, 5vw, 64px);
+    margin-top: 16px;
+}
+
+.pagina-form--simple {
+    grid-template-columns: minmax(0, 700px);
+}
+
+.pagina-form__principal {
+    max-width: 640px;
+}
+
+.titulo-pagina {
+    margin-bottom: 8px;
+    font-family: var(--fuente-display);
+    font-size: clamp(1.95rem, 4.4vw, 2.7rem);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+}
+
+.bajada {
+    max-width: 48ch;
+    margin-bottom: 28px;
+    color: var(--humo);
+    font-size: 1.02rem;
+}
+
+.nota-lateral {
+    padding: 20px;
+    background: var(--verdin);
+    border-top: 3px solid var(--maiz);
+}
+
+.nota-lateral__titulo {
+    margin-bottom: 8px;
+    font-family: var(--fuente-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.nota-lateral__texto {
+    color: var(--humo);
+    font-size: 0.95rem;
+    line-height: 1.55;
+}
+
+.nota-lateral__texto strong {
+    color: var(--pino);
+}
+
+.nota-lateral__rastro {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 30px;
+    margin-top: 18px;
+}
+
+.nota-lateral__rastro span {
+    display: block;
+    flex-grow: var(--peso, 1);
+    flex-shrink: 1;
+    flex-basis: 0%;
+    min-width: 4px;
+    height: 100%;
+    background: var(--pino);
+    border-radius: 1px 1px 0 0;
+}
+
+/* --------------------------------------------------------------------------
+   15. Formulario de gasto
+   -------------------------------------------------------------------------- */
+.form-gasto {
+    display: grid;
+    gap: 22px;
+}
+
+.form-gasto__rejilla {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.campo {
+    display: grid;
+    gap: 7px;
+}
+
+.campo__etiqueta {
+    color: var(--pino);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.campo__control {
+    width: 100%;
+    padding: 11px 12px;
+    background: var(--blanco);
+    border: 1.5px solid var(--borde-control);
+    border-radius: 2px;
+    color: var(--pino);
+    font-family: var(--fuente-texto);
+    font-size: 1.02rem;
+    line-height: 1.4;
+}
+
+.campo__control::placeholder {
+    color: #61746A;
+    opacity: 1;
+}
+
+.campo__control:hover {
+    border-color: var(--humo);
+}
+
+.campo__control:focus-visible {
+    border-color: var(--pino);
+    outline: 3px solid var(--jamaica);
+    outline-offset: 1px;
+}
+
+.campo__control--select {
+    padding-right: 34px;
+}
+
+.campo__control--area {
+    min-height: 96px;
+    resize: vertical;
+}
+
+.campo__dinero {
+    display: flex;
+    align-items: stretch;
+    background: var(--blanco);
+    border: 1.5px solid var(--borde-control);
+    border-radius: 2px;
+}
+
+.campo__dinero:hover {
+    border-color: var(--humo);
+}
+
+.campo__dinero:focus-within {
+    border-color: var(--pino);
+    outline: 3px solid var(--jamaica);
+    outline-offset: 1px;
+}
+
+.campo__signo {
+    display: flex;
+    align-items: center;
+    padding: 0 4px 0 12px;
+    color: var(--humo);
+    font-family: var(--fuente-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.campo__control--dinero {
+    flex: 1 1 0%;
+    width: auto;
+    min-width: 0;
+    padding: 11px 6px;
+    background: transparent;
+    border: 0;
+    font-family: var(--fuente-display);
+    font-size: 1.2rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+.campo__control--dinero:hover {
+    border-color: transparent;
+}
+
+.campo__control--dinero:focus-visible {
+    outline: none;
+}
+
+.campo__unidad {
+    display: flex;
+    align-items: center;
+    padding: 0 12px 0 4px;
+    color: var(--humo);
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.campo--mal .campo__control,
+.campo--mal .campo__dinero {
+    border-color: var(--jamaica);
+}
+
+.campo__error {
+    color: var(--jamaica-hondo);
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.errores {
+    padding: 14px 16px;
+    background: var(--jamaica-tenue);
+    border-left: 4px solid var(--jamaica);
+}
+
+.errores__titulo {
+    margin-bottom: 6px;
+    color: var(--jamaica-hondo);
+    font-weight: 700;
+}
+
+.errores__lista {
+    padding-left: 18px;
+    color: var(--jamaica-hondo);
+    font-size: 0.92rem;
+}
+
+.form-gasto__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 14px;
+    margin-top: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   16. Ficha de un gasto
+   -------------------------------------------------------------------------- */
+.ficha {
+    max-width: 700px;
+    padding-top: 22px;
+    border-top: 3px solid var(--pino);
+}
+
+.ficha__categoria {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    color: var(--humo);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.ficha__punto {
+    width: 9px;
+    height: 9px;
+    border-radius: 1px;
+}
+
+.ficha__titulo {
+    margin-bottom: 10px;
+    font-family: var(--fuente-display);
+    font-size: clamp(1.8rem, 5vw, 2.7rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+}
+
+.ficha__monto {
+    margin-bottom: 6px;
+    font-family: var(--fuente-display);
+    font-size: clamp(2.4rem, 8vw, 3.6rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1;
+}
+
+.ficha__fecha {
+    color: var(--humo);
+}
+
+.ficha__nota {
+    margin-top: 26px;
+    padding-top: 18px;
+    border-top: 1px solid var(--linea);
+}
+
+.ficha__nota-titulo {
+    margin-bottom: 6px;
+    color: var(--humo);
+    font-family: var(--fuente-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.ficha__nota p {
+    max-width: 60ch;
+    overflow-wrap: anywhere;
+}
+
+.ficha__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--linea);
+}
+
+.ficha__acciones form {
+    margin: 0;
+}
+
+.ficha__enlace-rastro {
+    margin-left: auto;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   17. 404
+   -------------------------------------------------------------------------- */
+.pagina-error {
+    max-width: 560px;
+    margin-top: clamp(24px, 6vh, 64px);
+}
+
+.pagina-error__codigo {
+    color: var(--maiz-hondo);
+    font-family: var(--fuente-display);
+    font-size: clamp(3.2rem, 11vw, 5.2rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    line-height: 1;
+}
+
+.pagina-error__titulo {
+    margin: 10px 0 10px;
+    font-family: var(--fuente-display);
+    font-size: clamp(1.7rem, 4vw, 2.3rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+.pagina-error__texto {
+    max-width: 46ch;
+    color: var(--humo);
+}
+
+.pagina-error__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+/* --------------------------------------------------------------------------
+   18. Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 960px) {
+    .pagina-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pagina-form__lado {
+        max-width: 560px;
+    }
+}
+
+@media (max-width: 760px) {
+    .principal {
+        padding-block: 18px 60px;
+    }
+
+    .categorias {
+        margin-top: 38px;
+    }
+
+    .categorias__lista {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .resumen__datos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px 16px;
+    }
+
+    .dato__valor {
+        font-size: 1.15rem;
+    }
+
+    .rastro-seccion {
+        margin-top: 36px;
+    }
+
+    .rastro {
+        height: 142px;
+        padding-top: 82px;
+    }
+
+    .rastro__pieza {
+        height: 58px;
+    }
+
+    .rastro__globo {
+        max-width: 190px;
+    }
+
+    /* Tabla → lista de filas apiladas. */
+    .tabla-gastos {
+        display: block;
+        margin-top: 14px;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .tabla-gastos thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .tabla-gastos tbody {
+        display: block;
+    }
+
+    .tabla-gastos__fila {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "fecha monto"
+            "que que"
+            "cat cat"
+            "acc acc";
+        gap: 4px 14px;
+        margin-top: 12px;
+        padding: 13px 14px 12px;
+        background: var(--blanco);
+        border: 1px solid var(--linea);
+        border-radius: 2px;
+    }
+
+    .tabla-gastos__celda {
+        display: block;
+        padding: 0;
+    }
+
+    .tabla-gastos th:first-child,
+    .tabla-gastos td:first-child,
+    .tabla-gastos th:last-child,
+    .tabla-gastos td:last-child {
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .celda--fecha {
+        grid-area: fecha;
+        padding-top: 2px;
+        font-size: 0.84rem;
+    }
+
+    .celda--que {
+        grid-area: que;
+        margin-top: 2px;
+    }
+
+    .gasto__descripcion {
+        font-size: 1.03rem;
+    }
+
+    .celda--categoria {
+        grid-area: cat;
+    }
+
+    .celda--monto {
+        grid-area: monto;
+        padding-top: 0;
+        font-size: 1.14rem;
+    }
+
+    .celda--acciones {
+        grid-area: acc;
+        margin-top: 8px;
+        padding-top: 9px;
+        border-top: 1px solid var(--linea);
+        text-align: left;
+    }
+
+    .acciones-fila {
+        justify-content: flex-start;
+        gap: 18px;
+    }
+
+    .accion {
+        padding: 10px 2px;
+    }
+
+    .paginacion {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 4px 18px;
+    }
+
+    .paginacion__cuenta {
+        width: 100%;
+        order: -1;
+    }
+
+    .pagina-form__principal {
+        max-width: 100%;
+    }
+
+    .ficha__enlace-rastro {
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 560px) {
+    .cabecera__interior {
+        padding-block: 12px;
+    }
+
+    .marca__texto {
+        font-size: 1.06rem;
+    }
+
+    .cabecera__nav {
+        gap: 8px;
+    }
+
+    .boton {
+        min-height: 40px;
+        padding: 9px 13px;
+        font-size: 0.9rem;
+    }
+
+    .filtros {
+        margin-top: 20px;
+    }
+
+    .filtros__campo {
+        flex-basis: 100%;
+        max-width: none;
+    }
+
+    .filtros__acciones {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .resumen__frase {
+        font-size: 1rem;
+    }
+
+    .resumen__datos {
+        gap: 12px;
+    }
+
+    .rastro {
+        height: 124px;
+        padding-top: 70px;
+    }
+
+    .rastro__pieza {
+        height: 52px;
+        min-width: 7px;
+    }
+
+    .rastro__globo {
+        max-width: 172px;
+        padding: 7px 9px;
+    }
+
+    .rastro__globo-desc {
+        font-size: 0.85rem;
+    }
+
+    .rastro__eje {
+        font-size: 0.74rem;
+    }
+
+    .lista-gastos,
+    .categorias {
+        margin-top: 36px;
+    }
+
+    .form-gasto__rejilla {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .titulo-pagina {
+        font-size: 1.85rem;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   19. Movimiento reducido: el rastro aparece sin animación.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .rastro__pieza {
+        animation: none !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
