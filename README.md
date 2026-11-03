@@ -1,6 +1,6 @@
 # Gastos Hormiga
 
-Aplicación Laravel para anotar los **gastos hormiga**: esos gastos pequeños y diarios (el café, la botana, el transporte, la suscripción) que casi no se sienten pero que al mes suman. Registra cada gasto con monto, categoría, fecha y una nota opcional, y muestra cuánto llevas gastado en el mes y en el día.
+Aplicación Laravel para anotar los **gastos hormiga**: esos gastos pequeños y diarios (el café, la botana, el transporte, la suscripción) que casi no se sienten pero que al mes suman. Registra cada gasto con monto, categoría, fecha y una nota opcional, y muestra cuánto llevas gastado en el mes y en el día
 
 Es un **CRUD básico sin autenticación**: cualquiera con acceso a la URL puede crear, ver, editar y borrar gastos. Está pensada para uso personal o como proyecto de práctica.
 
