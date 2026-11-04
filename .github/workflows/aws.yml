@@ -13,6 +13,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, bcmath, curl, zip, mysql
+      
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
