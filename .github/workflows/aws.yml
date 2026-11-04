@@ -20,7 +20,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/mi-app
+            cd /var/www/mi_cicd_laravelapp
 
             # Si el repo no existe aún en el servidor, clónalo
             if [ ! -d ".git" ]; then
