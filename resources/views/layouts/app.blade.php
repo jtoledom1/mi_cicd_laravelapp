@@ -29,7 +29,7 @@
                         <path d="M16.6 10.4 18.4 7.6M18.9 12h2.2M16.6 13.6 18.4 16.4M11.4 10.4 10.4 7.4M11.4 13.6 10.4 16.6M12.9 10.4 14 7.5M12.9 13.6 14 16.5"></path>
                     </g>
                 </svg>
-                <span class="marca__texto">Gastos Hormiga</span>
+                <span class="marca__texto">Gastoooooos Hormiga</span>
             </a>
 
             @unless (request()->routeIs('gastos.create'))
