@@ -1,8 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Editar gasto | Gastos Hormiga')
+@section('title', $ambito->esFamilia() ? 'Editar un gasto de la familia | Gastos Hormiga' : 'Editar gasto | Gastos Hormiga')
 
 @section('content')
+    @php
+        $esFamilia = $ambito->esFamilia();
+    @endphp
+
     <div class="pagina-form pagina-form--simple">
         <div class="pagina-form__principal">
             <a class="volver" href="{{ route('gastos.show', $gasto) }}">
@@ -12,8 +16,14 @@
                 Volver al gasto
             </a>
 
-            <h1 class="titulo-pagina">Editar gasto</h1>
-            <p class="bajada">Corrige el monto, la fecha o lo que haga falta. El rastro se reacomoda solo.</p>
+            <h1 class="titulo-pagina">{{ $esFamilia ? 'Editar un gasto de la familia' : 'Editar gasto' }}</h1>
+            <p class="bajada">
+                @if ($esFamilia)
+                    Corrige el monto, la fecha o la cuenta. El cambio lo verá todo el hogar ({{ $ambito->nombre() }}).
+                @else
+                    Corrige el monto, la fecha o lo que haga falta. El rastro se reacomoda solo.
+                @endif
+            </p>
 
             @include('gastos.partials.form')
         </div>

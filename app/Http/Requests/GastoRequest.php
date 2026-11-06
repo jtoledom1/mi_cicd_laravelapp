@@ -28,6 +28,8 @@ class GastoRequest extends FormRequest
             'categoria' => ['required', 'in:'.implode(',', GastoHormiga::CATEGORIAS)],
             'fecha' => ['required', 'date', 'before_or_equal:today'],
             'notas' => ['nullable', 'string', 'max:500'],
+            'cuenta_id' => ['nullable', 'integer'],
+            'ambito' => ['nullable', 'in:personal,familia'],
         ];
     }
 

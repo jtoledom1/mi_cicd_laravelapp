@@ -1,0 +1,712 @@
+/* ==========================================================================
+   Gastos Hormiga — hojas de resumen (mensual y anual)
+   --------------------------------------------------------------------------
+   Dos pantallas y una sola idea: el ritmo.
+
+   En el mes, treinta y una barras verticales alineadas sobre el calendario,
+   como un rastro de hormigas que se detiene los días sin gasto. En el año,
+   doce renglones de libreta que se comparan de un vistazo. La gráfica es
+   divs y custom properties: nada de lienzo, nada de imágenes.
+
+   Nada de tarjetas. Los bloques se separan con reglas —una hairline entre
+   secciones, una regla de pino de 3 px sobre la cifra principal— y la
+   jerarquía la carga la tipografía. El maíz queda para las marcas pequeñas
+   (el mes en curso, el orden de los cinco más caros); la jamaica, para lo
+   que hay que mirar primero: el día más caro, el mes más caro, las acciones.
+
+   Solo usa los tokens de app.css: esta hoja se carga después y no define
+   colores propios.
+   ========================================================================== */
+
+:root {
+    /* Realce de fila al pasar el cursor. Es el mismo tono que app.css usa en
+       .tabla-gastos__fila:hover, para que la lista de gastos y estas listas
+       respondan igual. */
+    --rm-realce: #E9EFE3;
+    --rm-realce-fuerte: #E2EADD;
+}
+
+/* --------------------------------------------------------------------------
+   1. Cabecera: navegación entre periodos y título
+   -------------------------------------------------------------------------- */
+.rm-cabeza {
+    margin-top: 2px;
+}
+
+.rm-cabeza__nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--linea);
+}
+
+.rm-cabeza__paso {
+    display: inline-flex;
+    align-items: stretch;
+    max-width: 100%;
+    margin-left: auto;
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    background: transparent;
+}
+
+.rm-nav-enlace {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 8px 10px;
+    color: var(--humo);
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.rm-nav-enlace svg {
+    flex: none;
+}
+
+.rm-nav-enlace:hover {
+    color: var(--jamaica);
+}
+
+.rm-cabeza__paso .rm-nav-enlace + .rm-nav-enlace {
+    border-left: 1px solid var(--linea);
+}
+
+.rm-cabeza__paso .rm-nav-enlace:hover {
+    background: var(--verdin);
+    color: var(--jamaica-hondo);
+}
+
+.rm-cabeza__titulo {
+    margin-top: 22px;
+    font-family: var(--fuente-display);
+    font-size: clamp(2.1rem, 5.6vw, 3.3rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    overflow-wrap: anywhere;
+}
+
+.rm-cabeza__titulo--largo {
+    font-size: clamp(1.85rem, 4.4vw, 2.85rem);
+    letter-spacing: -0.035em;
+    line-height: 1.04;
+}
+
+/* Salto de año: formulario GET mínimo, sin caja alrededor. */
+.rm-saltar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.rm-saltar__etiqueta {
+    color: var(--humo);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.rm-saltar__control {
+    min-height: 40px;
+    padding: 6px 8px;
+    background: var(--blanco);
+    border: 1.5px solid var(--borde-control);
+    border-radius: 2px;
+    color: var(--pino);
+    font-family: var(--fuente-texto);
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+.rm-saltar__control:hover {
+    border-color: var(--humo);
+}
+
+.rm-saltar__control:focus-visible {
+    border-color: var(--pino);
+}
+
+.rm-saltar .boton {
+    min-height: 40px;
+    padding: 8px 14px;
+}
+
+/* --------------------------------------------------------------------------
+   2. Bloque del total
+   -------------------------------------------------------------------------- */
+.rm-total {
+    margin-top: 26px;
+    padding-top: 18px;
+    border-top: 3px solid var(--pino);
+}
+
+.rm-total__rotulo {
+    color: var(--humo);
+    font-family: var(--fuente-display);
+    font-size: clamp(1rem, 1.4vw, 1.1rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+/* Ajustes sobre .resumen__total de app.css: aquí el aire de arriba lo pone
+   el rótulo y abajo va la frase de comparación. */
+.rm-total .resumen__total {
+    margin: 2px 0 10px;
+}
+
+.rm-dato__nota {
+    display: block;
+    margin-top: 1px;
+    color: var(--humo);
+    font-family: var(--fuente-texto);
+    font-size: 0.76rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.35;
+}
+
+/* --------------------------------------------------------------------------
+   3. Secciones
+   -------------------------------------------------------------------------- */
+.rm-seccion {
+    margin-top: 46px;
+}
+
+/* Un bloque dentro de la rejilla de dos columnas ya viene separado por la
+   regla del contenedor: no necesita margen propio. */
+.rm-seccion.rm-seccion--duo {
+    margin-top: 0;
+}
+
+.rm-seccion__cabeza {
+    display: grid;
+    gap: 6px;
+}
+
+.rm-seccion__nota {
+    max-width: 64ch;
+    color: var(--humo);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   4. El ritmo del mes: una barra por día
+   -------------------------------------------------------------------------- */
+.rm-ritmo {
+    margin: 20px 0 0;
+}
+
+.rm-ritmo__grafico {
+    display: grid;
+    grid-template-columns: repeat(var(--dias, 31), minmax(0, 1fr));
+    gap: 2px;
+    height: clamp(128px, 18vw, 176px);
+    padding-top: 10px;
+    border-bottom: 1.5px solid var(--linea-fuerte);
+    background-image: repeating-linear-gradient(
+        to top,
+        transparent 0 calc(25% - 1px),
+        var(--linea) calc(25% - 1px) 25%
+    );
+}
+
+.rm-ritmo__dia {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    min-width: 0;
+}
+
+.rm-ritmo__barra {
+    display: block;
+    width: 100%;
+    max-width: 22px;
+    height: max(3px, var(--alto, 0%));
+    background: var(--pino);
+    border-radius: 1px 1px 0 0;
+    transform-origin: bottom center;
+    animation: rm-ritmo-entra 520ms cubic-bezier(0.2, 0.75, 0.25, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 14ms);
+}
+
+/* Día sin gasto: apenas una marca de verdín sobre la línea de base. */
+.rm-ritmo__barra--vacia {
+    height: 2px;
+    background: var(--verdin);
+    animation: none;
+}
+
+/* El día más caro es lo primero que se ve. */
+.rm-ritmo__dia--tope .rm-ritmo__barra {
+    background: var(--jamaica);
+    box-shadow: inset 0 2px 0 var(--maiz);
+}
+
+.rm-ritmo__eje {
+    display: grid;
+    grid-template-columns: repeat(var(--dias, 31), minmax(0, 1fr));
+    gap: 2px;
+    margin-top: 7px;
+    color: var(--humo);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.rm-ritmo__etiqueta {
+    white-space: nowrap;
+}
+
+.rm-ritmo__etiqueta--inicio {
+    justify-self: start;
+}
+
+.rm-ritmo__etiqueta--medio {
+    justify-self: center;
+}
+
+.rm-ritmo__etiqueta--fin {
+    justify-self: end;
+}
+
+.rm-ritmo__nota {
+    max-width: 62ch;
+    margin-top: 14px;
+    color: var(--humo);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.rm-ritmo__nota strong {
+    color: var(--pino);
+    font-weight: 700;
+}
+
+@keyframes rm-ritmo-entra {
+    from {
+        opacity: 0;
+        transform: scaleY(0.2);
+    }
+
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   5. Reparto por categoría
+   -------------------------------------------------------------------------- */
+.rm-cat {
+    margin-top: 18px;
+    padding: 0;
+    border-top: 1.5px solid var(--linea-fuerte);
+    list-style: none;
+}
+
+.rm-cat__fila {
+    display: grid;
+    grid-template-columns: 10px minmax(0, 1fr) auto;
+    grid-template-areas:
+        "punto nombre monto"
+        "barra barra barra";
+    align-items: center;
+    column-gap: 9px;
+    row-gap: 8px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--linea);
+}
+
+.rm-cat__punto {
+    grid-area: punto;
+    width: 10px;
+    height: 10px;
+    border-radius: 1px;
+}
+
+.rm-cat__nombre {
+    grid-area: nombre;
+    font-size: 0.97rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.rm-cat__monto {
+    grid-area: monto;
+    font-family: var(--fuente-display);
+    font-size: 0.98rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.rm-cat__parte {
+    margin-left: 5px;
+    color: var(--humo);
+    font-family: var(--fuente-texto);
+    font-size: 0.74rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 400;
+}
+
+.rm-cat__barra {
+    grid-area: barra;
+    display: block;
+    height: 5px;
+    overflow: hidden;
+    background: var(--verdin);
+}
+
+.rm-cat__relleno {
+    display: block;
+    height: 100%;
+    width: max(2px, var(--parte, 0%));
+}
+
+/* --------------------------------------------------------------------------
+   6. Los cinco más caros: lista ordenada, numeración de puesto por contador
+   -------------------------------------------------------------------------- */
+.rm-top {
+    margin: 18px 0 0;
+    padding: 0;
+    border-top: 1.5px solid var(--linea-fuerte);
+    list-style: none;
+    counter-reset: rm-puesto;
+}
+
+.rm-top__fila {
+    display: grid;
+    grid-template-columns: 2ch minmax(0, 1fr) auto;
+    align-items: baseline;
+    column-gap: 12px;
+    padding: 12px 8px 12px 0;
+    border-bottom: 1px solid var(--linea);
+    color: var(--pino);
+    text-decoration: none;
+    transition: background-color var(--transicion);
+}
+
+/* El puesto en el orden de la lista, en maíz hondo: cifra, no adorno. */
+.rm-top__fila::before {
+    counter-increment: rm-puesto;
+    content: counter(rm-puesto);
+    color: var(--maiz-hondo);
+    font-family: var(--fuente-display);
+    font-size: 0.82rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.rm-top__fila:hover {
+    background: var(--rm-realce);
+    color: var(--pino);
+}
+
+.rm-top__desc {
+    display: block;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.rm-top__fila:hover .rm-top__desc {
+    color: var(--jamaica-hondo);
+}
+
+.rm-top__meta {
+    display: block;
+    margin-top: 3px;
+    color: var(--humo);
+    font-size: 0.82rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.35;
+}
+
+.rm-top__monto {
+    font-family: var(--fuente-display);
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   7. Dos columnas: reparto y cinco más caros (solo en pantallas anchas)
+   -------------------------------------------------------------------------- */
+.rm-duo {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 0 clamp(28px, 4vw, 56px);
+    margin-top: 46px;
+    padding-top: 30px;
+    border-top: 1.5px solid var(--linea-fuerte);
+}
+
+.rm-duo > * {
+    min-width: 0;
+}
+
+.rm-duo__bloque--der {
+    padding-left: clamp(20px, 3vw, 40px);
+    border-left: 1px solid var(--linea);
+}
+
+/* Cuando solo hay un bloque (sin reparto o sin cinco más caros), la rejilla
+   se queda con una columna y desaparece la regla vertical. */
+.rm-duo--solo {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.rm-duo--solo .rm-duo__bloque--der {
+    padding-left: 0;
+    border-left: 0;
+}
+
+/* --------------------------------------------------------------------------
+   8. El año: doce renglones de libreta
+   -------------------------------------------------------------------------- */
+.rm-meses {
+    margin-top: 18px;
+    border-top: 1.5px solid var(--linea-fuerte);
+}
+
+.rm-mes {
+    display: grid;
+    grid-template-columns: 7em minmax(0, 1fr) auto;
+    grid-template-areas: "nombre pista monto";
+    align-items: center;
+    gap: 6px 16px;
+    padding: 9px 8px 9px 0;
+    border-bottom: 1px solid var(--linea);
+    color: var(--pino);
+    text-decoration: none;
+    transition: background-color var(--transicion);
+}
+
+.rm-mes:hover {
+    background: var(--rm-realce);
+    color: var(--pino);
+}
+
+.rm-mes__nombre {
+    grid-area: nombre;
+    font-size: 0.96rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.rm-mes:hover .rm-mes__nombre {
+    color: var(--jamaica-hondo);
+}
+
+.rm-mes__pista {
+    grid-area: pista;
+    display: block;
+    height: 12px;
+    overflow: hidden;
+    background: var(--verdin);
+}
+
+.rm-mes__relleno {
+    display: block;
+    height: 100%;
+    width: max(3px, var(--parte, 0%));
+    background-color: var(--pino);
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent 0 7px,
+        rgba(255, 255, 255, 0.16) 7px 8px
+    );
+    transform-origin: left center;
+    animation: rm-mes-entra 420ms cubic-bezier(0.2, 0.75, 0.25, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 28ms);
+}
+
+.rm-mes__monto {
+    grid-area: monto;
+    font-family: var(--fuente-display);
+    font-size: 0.98rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Mes sin gastos: se apaga, la pista queda como línea punteada y el monto
+   es una raya. */
+.rm-mes--vacio {
+    color: var(--humo);
+}
+
+.rm-mes--vacio .rm-mes__nombre {
+    font-weight: 400;
+}
+
+.rm-mes--vacio .rm-mes__pista {
+    background-color: transparent;
+    background-image: repeating-linear-gradient(90deg, var(--linea-fuerte) 0 3px, transparent 3px 8px);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 1px;
+}
+
+.rm-mes--vacio .rm-mes__monto {
+    color: var(--humo);
+    font-weight: 400;
+}
+
+/* El mes con más gasto, en jamaica; el que corre ahora, con fondo y marca. */
+.rm-mes--tope .rm-mes__relleno {
+    background-color: var(--jamaica);
+}
+
+.rm-mes--curso {
+    background: var(--rm-realce);
+}
+
+.rm-mes--curso:hover {
+    background: var(--rm-realce-fuerte);
+}
+
+.rm-mes__marca {
+    margin-left: 6px;
+    color: var(--maiz-hondo);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+@keyframes rm-mes-entra {
+    from {
+        opacity: 0;
+        transform: scaleX(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   9. Estado vacío: ajustes sobre .vacio de app.css
+   -------------------------------------------------------------------------- */
+.rm-vacio__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 18px;
+}
+
+/* --------------------------------------------------------------------------
+   10. Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 980px) {
+    .rm-duo {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+        padding-top: 26px;
+    }
+
+    .rm-duo__bloque--der {
+        padding-top: 34px;
+        padding-left: 0;
+        border-top: 1px solid var(--linea);
+        border-left: 0;
+    }
+}
+
+@media (max-width: 760px) {
+    .rm-cabeza__nav {
+        gap: 10px 12px;
+    }
+
+    .rm-cabeza__paso {
+        margin-left: 0;
+    }
+
+    .rm-seccion {
+        margin-top: 38px;
+    }
+}
+
+@media (max-width: 620px) {
+    .rm-mes {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "nombre monto"
+            "pista pista";
+        row-gap: 7px;
+        padding-block: 10px;
+    }
+
+    .rm-mes__pista {
+        height: 10px;
+    }
+
+    .rm-ritmo__grafico {
+        height: 132px;
+    }
+}
+
+@media (max-width: 400px) {
+    .rm-ritmo__grafico {
+        gap: 1.5px;
+    }
+
+    .rm-ritmo__eje {
+        gap: 1.5px;
+        font-size: 0.68rem;
+    }
+
+    .rm-top__fila {
+        column-gap: 9px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   11. Movimiento reducido: sin entrada escalonada.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .rm-ritmo__barra,
+    .rm-mes__relleno {
+        animation: none !important;
+    }
+}
+
+
+/* --------------------------------------------------------------------------
+   Selector de espacio (personal / familia) — añadido junto al de periodos
+   -------------------------------------------------------------------------- */
+.rm-cabeza__espacio {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding-left: 6px;
+    border-left: 1px solid var(--linea);
+}
+
+.rm-nav-enlace--activo {
+    color: var(--pino);
+    font-weight: 700;
+    box-shadow: inset 0 -2px 0 0 var(--maiz);
+}
+
+@media (max-width: 760px) {
+    .rm-cabeza__espacio {
+        padding-left: 0;
+        border-left: 0;
+    }
+}

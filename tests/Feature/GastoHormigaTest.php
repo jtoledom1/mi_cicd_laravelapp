@@ -2,19 +2,34 @@
 
 namespace Tests\Feature;
 
+use App\Models\Familia;
 use App\Models\GastoHormiga;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
  * Pruebas del CRUD de "Gastos Hormiga": rutas, vistas, validación y filtros.
  *
- * La base de datos de tests es SQLite en memoria (ver phpunit.xml), así que
- * RefreshDatabase migra el esquema desde cero en cada test.
+ * La app es multiusuario: cada test trabaja con un usuario autenticado y los
+ * gastos se crean siempre con dueño. La base de datos de tests es SQLite en
+ * memoria (ver phpunit.xml), así que RefreshDatabase migra el esquema desde
+ * cero en cada test.
  */
 class GastoHormigaTest extends TestCase
 {
     use RefreshDatabase;
+
+    /** Usuario autenticado con el que corre cada test. */
+    private User $usuario;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->usuario = User::factory()->create();
+        $this->actingAs($this->usuario);
+    }
 
     // -----------------------------------------------------------------------
     // Utilidades
@@ -22,17 +37,20 @@ class GastoHormigaTest extends TestCase
 
     /**
      * Crea un gasto de ejemplo con datos válidos por defecto.
-     * Se apoya en la factory GastoHormigaFactory (formato estándar de Laravel).
+     * Se apoya en la factory GastoHormigaFactory (formato estándar de Laravel)
+     * y lo asigna al usuario indicado o, si no se indica, al del test.
      */
-    private function crearGasto(array $atributos = []): GastoHormiga
+    private function crearGasto(array $atributos = [], ?User $usuario = null): GastoHormiga
     {
-        return GastoHormiga::factory()->create(array_merge([
-            'descripcion' => 'Café americano',
-            'monto' => 25.50,
-            'categoria' => 'Café',
-            'fecha' => now()->toDateString(),
-            'notas' => null,
-        ], $atributos));
+        return GastoHormiga::factory()
+            ->for($usuario ?? $this->usuario)
+            ->create(array_merge([
+                'descripcion' => 'Café americano',
+                'monto' => 25.50,
+                'categoria' => 'Café',
+                'fecha' => now()->toDateString(),
+                'notas' => null,
+            ], $atributos));
     }
 
     /**
@@ -64,6 +82,28 @@ class GastoHormigaTest extends TestCase
     {
         // startOfMonth() evita los días inexistentes (31 de febrero, etc.).
         return now()->startOfMonth()->subMonth()->addDays(3)->toDateString();
+    }
+
+    /**
+     * Crea un hogar con el usuario del test como propietario y, si se indica,
+     * otros miembros. El hogar nace con su cuenta "General".
+     *
+     * @param  list<User>  $miembros
+     */
+    private function crearHogar(array $miembros = []): Familia
+    {
+        $familia = Familia::create([
+            'nombre' => 'Casa Solar',
+            'propietario_id' => $this->usuario->id,
+            'codigo_invitacion' => 'ABC12345',
+        ]);
+
+        $familia->miembros()->attach(array_merge(
+            [$this->usuario->id],
+            array_map(static fn (User $miembro): int => $miembro->id, $miembros),
+        ));
+
+        return $familia;
     }
 
     // -----------------------------------------------------------------------
@@ -302,5 +342,187 @@ class GastoHormigaTest extends TestCase
             ->assertOk()
             ->assertSee('Café del mes anterior')
             ->assertDontSee('Café del mes actual');
+    }
+
+    // -----------------------------------------------------------------------
+    // 16-21. Aislamiento entre usuarios
+    // -----------------------------------------------------------------------
+
+    public function test_el_index_solo_muestra_los_gastos_del_usuario(): void
+    {
+        $ajeno = User::factory()->create();
+
+        $this->crearGasto(['descripcion' => 'Café propio de la cuenta']);
+        $this->crearGasto(['descripcion' => 'Gasto privado de otra cuenta'], $ajeno);
+
+        $this->get(route('gastos.index'))
+            ->assertOk()
+            ->assertSee('Café propio de la cuenta')
+            ->assertDontSee('Gasto privado de otra cuenta');
+    }
+
+    public function test_ver_un_gasto_ajeno_devuelve_404(): void
+    {
+        $ajeno = User::factory()->create();
+        $gasto = $this->crearGasto(['descripcion' => 'Gasto de otra persona'], $ajeno);
+
+        $this->get(route('gastos.show', $gasto))->assertNotFound();
+    }
+
+    public function test_editar_un_gasto_ajeno_devuelve_404(): void
+    {
+        $ajeno = User::factory()->create();
+        $gasto = $this->crearGasto(['descripcion' => 'Gasto de otra persona'], $ajeno);
+
+        $this->get(route('gastos.edit', $gasto))->assertNotFound();
+    }
+
+    public function test_actualizar_un_gasto_ajeno_devuelve_404_y_no_lo_cambia(): void
+    {
+        $ajeno = User::factory()->create();
+        $gasto = $this->crearGasto([
+            'descripcion' => 'Gasto ajeno original',
+            'monto' => 33.30,
+            'categoria' => 'Otro',
+            'fecha' => now()->toDateString(),
+        ], $ajeno);
+
+        $this->put(route('gastos.update', $gasto), $this->datosValidos([
+            'descripcion' => 'Intento de cambio',
+            'monto' => 1.00,
+        ]))->assertNotFound();
+
+        $this->assertDatabaseHas('gastos_hormiga', [
+            'id' => $gasto->id,
+            'descripcion' => 'Gasto ajeno original',
+            'categoria' => 'Otro',
+            'monto' => 33.30,
+            'user_id' => $ajeno->id,
+        ]);
+    }
+
+    public function test_borrar_un_gasto_ajeno_devuelve_404_y_sigue_en_la_base(): void
+    {
+        $ajeno = User::factory()->create();
+        $gasto = $this->crearGasto(['descripcion' => 'Gasto que no me toca'], $ajeno);
+
+        $this->delete(route('gastos.destroy', $gasto))->assertNotFound();
+
+        $this->assertDatabaseHas('gastos_hormiga', ['id' => $gasto->id]);
+    }
+
+    public function test_store_asigna_el_user_id_del_usuario_autenticado(): void
+    {
+        $this->post(route('gastos.store'), $this->datosValidos([
+            'descripcion' => 'Gasto con dueño automático',
+            'monto' => 19.90,
+        ]))->assertRedirect(route('gastos.index'));
+
+        $this->assertDatabaseHas('gastos_hormiga', [
+            'descripcion' => 'Gasto con dueño automático',
+            'user_id' => $this->usuario->id,
+        ]);
+    }
+
+    // -----------------------------------------------------------------------
+    // 22-26. Ámbito familiar
+    // -----------------------------------------------------------------------
+
+    public function test_el_index_con_ambito_familia_muestra_los_gastos_del_hogar_y_no_los_personales(): void
+    {
+        $familia = $this->crearHogar();
+        $cuenta = $familia->cuentaGeneral();
+
+        $this->crearGasto([
+            'descripcion' => 'Gas del hogar',
+            'monto' => 450.00,
+            'familia_id' => $familia->id,
+            'cuenta_id' => $cuenta->id,
+        ]);
+        $this->crearGasto(['descripcion' => 'Café personal']);
+
+        $this->get(route('gastos.index', ['ambito' => 'familia']))
+            ->assertOk()
+            ->assertViewIs('gastos.index')
+            ->assertSee('Gas del hogar')
+            ->assertDontSee('Café personal');
+    }
+
+    public function test_el_index_personal_no_muestra_los_gastos_del_hogar(): void
+    {
+        $familia = $this->crearHogar();
+        $cuenta = $familia->cuentaGeneral();
+
+        $this->crearGasto(['descripcion' => 'Café personal']);
+        $this->crearGasto([
+            'descripcion' => 'Despensa del hogar',
+            'familia_id' => $familia->id,
+            'cuenta_id' => $cuenta->id,
+        ]);
+
+        $this->get(route('gastos.index'))
+            ->assertOk()
+            ->assertSee('Café personal')
+            ->assertDontSee('Despensa del hogar');
+    }
+
+    public function test_store_con_una_cuenta_del_hogar_guarda_el_gasto_como_familiar(): void
+    {
+        $familia = $this->crearHogar();
+        $cuenta = $familia->cuentaGeneral();
+
+        $this->post(route('gastos.store'), $this->datosValidos([
+            'descripcion' => 'Gas de la casa',
+            'monto' => 450.00,
+            'categoria' => 'Otro',
+            'cuenta_id' => $cuenta->id,
+            'ambito' => 'familia',
+        ]))
+            ->assertRedirect(route('gastos.index', ['ambito' => 'familia']))
+            ->assertSessionHas('status');
+
+        $this->assertDatabaseHas('gastos_hormiga', [
+            'descripcion' => 'Gas de la casa',
+            'user_id' => $this->usuario->id,
+            'familia_id' => $familia->id,
+            'cuenta_id' => $cuenta->id,
+        ]);
+    }
+
+    public function test_un_miembro_del_hogar_puede_ver_un_gasto_familiar_de_otro_miembro(): void
+    {
+        $otro = User::factory()->create(['name' => 'Ana']);
+        $familia = $this->crearHogar([$otro]);
+        $cuenta = $familia->cuentaGeneral();
+
+        $gasto = $this->crearGasto([
+            'descripcion' => 'Despensa compartida',
+            'familia_id' => $familia->id,
+            'cuenta_id' => $cuenta->id,
+        ], $otro);
+
+        $this->get(route('gastos.show', $gasto))
+            ->assertOk()
+            ->assertSee('Despensa compartida');
+    }
+
+    public function test_un_usuario_ajeno_al_hogar_recibe_404_al_ver_un_gasto_familiar(): void
+    {
+        $ajeno = User::factory()->create(['email' => 'ajeno@example.com']);
+        $familiaAjena = Familia::create([
+            'nombre' => 'Hogar ajeno',
+            'propietario_id' => $ajeno->id,
+            'codigo_invitacion' => 'AJENO123',
+        ]);
+        $familiaAjena->miembros()->attach($ajeno->id);
+        $cuenta = $familiaAjena->cuentaGeneral();
+
+        $gasto = $this->crearGasto([
+            'descripcion' => 'Gasto de otra familia',
+            'familia_id' => $familiaAjena->id,
+            'cuenta_id' => $cuenta->id,
+        ], $ajeno);
+
+        $this->get(route('gastos.show', $gasto))->assertNotFound();
     }
 }

@@ -10,12 +10,29 @@
     }
 
     $categoriaActual = old('categoria', $gasto->categoria);
+
+    $ambito = $ambito ?? null;
+    $cuentas = $cuentas ?? collect();
+    $esFamilia = (bool) ($ambito?->esFamilia() ?? false);
+    $nombreEspacio = $ambito?->nombre() ?? 'Personal';
+    $parametrosEspacio = $ambito?->parametros() ?? [];
+
+    $cuentaActual = old('cuenta_id', $gasto->cuenta_id);
 @endphp
 
-<form class="form-gasto" method="POST" action="{{ $esEdicion ? route('gastos.update', $gasto) : route('gastos.store') }}">
+<form class="form-gasto" method="POST" action="{{ $esEdicion ? route('gastos.update', $gasto) : route('gastos.store', $parametrosEspacio) }}">
     @csrf
     @if ($esEdicion)
         @method('PUT')
+    @endif
+
+    <input type="hidden" name="ambito" value="{{ $ambito?->tipo ?? 'personal' }}">
+
+    @if ($esFamilia)
+        <p class="form-gasto__familia">
+            <strong>Este gasto se comparte con el hogar.</strong>
+            Lo verá todo el hogar ({{ $nombreEspacio }}) y saldrá de una cuenta compartida, no solo de tu bolsillo.
+        </p>
     @endif
 
     @if ($errors->any())
@@ -96,6 +113,37 @@
         </div>
     </div>
 
+    <div class="campo @error('cuenta_id') campo--mal @enderror">
+        <label class="campo__etiqueta" for="cuenta_id">Cuenta</label>
+
+        @if ($cuentas->isEmpty())
+            <p class="campo__aviso">
+                Todavía no hay cuentas en este espacio: el gasto entrará a la cuenta General.
+                <a href="{{ route('cuentas.index', $parametrosEspacio) }}">Crear una cuenta</a>
+                para separar de dónde salió el dinero.
+            </p>
+        @else
+            <select
+                class="campo__control campo__control--select"
+                id="cuenta_id"
+                name="cuenta_id"
+                @error('cuenta_id') aria-invalid="true" aria-describedby="cuenta_id-error" @enderror
+            >
+                @foreach ($cuentas as $opcion)
+                    <option value="{{ $opcion->id }}" @selected((string) $cuentaActual === (string) $opcion->id)>{{ $opcion->nombre }}</option>
+                @endforeach
+            </select>
+            <p class="campo__ayuda" id="cuenta_id-ayuda">
+                Separa de dónde salió el dinero. Puedes crear más cuentas en la sección
+                <a href="{{ route('cuentas.index', $parametrosEspacio) }}">Cuentas</a>.
+            </p>
+        @endif
+
+        @error('cuenta_id')
+            <p class="campo__error" id="cuenta_id-error">{{ $message }}</p>
+        @enderror
+    </div>
+
     <div class="campo @error('categoria') campo--mal @enderror">
         <label class="campo__etiqueta" for="categoria">Categoría</label>
         <select
@@ -132,6 +180,6 @@
 
     <div class="form-gasto__acciones">
         <button class="boton boton--lleno" type="submit">{{ $esEdicion ? 'Guardar cambios' : 'Guardar gasto' }}</button>
-        <a class="boton boton--fantasma" href="{{ route('gastos.index') }}">Cancelar</a>
+        <a class="boton boton--fantasma" href="{{ route('gastos.index', $parametrosEspacio) }}">Cancelar</a>
     </div>
 </form>

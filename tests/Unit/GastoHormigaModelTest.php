@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\GastoHormiga;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -19,16 +20,21 @@ class GastoHormigaModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** Crea un gasto de ejemplo con datos válidos por defecto. */
+    /**
+     * Crea un gasto de ejemplo con datos válidos por defecto.
+     * Todo gasto necesita dueño: la columna user_id es obligatoria.
+     */
     private function crearGasto(array $atributos = []): GastoHormiga
     {
-        return GastoHormiga::factory()->create(array_merge([
-            'descripcion' => 'Café americano',
-            'monto' => 25.50,
-            'categoria' => 'Café',
-            'fecha' => now()->toDateString(),
-            'notas' => null,
-        ], $atributos));
+        return GastoHormiga::factory()
+            ->for(User::factory()->create())
+            ->create(array_merge([
+                'descripcion' => 'Café americano',
+                'monto' => 25.50,
+                'categoria' => 'Café',
+                'fecha' => now()->toDateString(),
+                'notas' => null,
+            ], $atributos));
     }
 
     public function test_la_constante_categorias_contiene_cafe_y_otro(): void

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Este mes | Gastos Hormiga')
+@section('title', $ambito->esFamilia() ? $ambito->nombre() . ' | Gastos Hormiga' : 'Este mes | Gastos Hormiga')
 
 @section('content')
     @php
@@ -40,15 +40,60 @@
         $maxCategoria = (float) ($gastosPorCategoria->max() ?? 0);
         $totalCategorias = (float) $gastosPorCategoria->sum();
 
-        $paginador = $gastos->appends(array_filter(
-            ['mes' => $mes, 'categoria' => $categoria],
+        // El usuario puede tener hogar y estar mirando su espacio personal.
+        $tieneHogar = auth()->user()?->familia() !== null;
+
+        // Filtros que viajan en los enlaces de paginación y de exportación.
+        $filtrosListado = array_filter(
+            array_merge($ambito->parametros(), [
+                'mes' => $mes,
+                'categoria' => $categoria,
+                'cuenta' => $cuenta?->id,
+            ]),
             static fn ($valor) => $valor !== null && $valor !== ''
-        ));
+        );
+
+        $filtrosExportar = array_filter(
+            array_merge($ambito->parametros(), [
+                'mes' => $mes,
+                'cuenta' => $cuenta?->id,
+                'categoria' => $categoria,
+            ]),
+            static fn ($valor) => $valor !== null && $valor !== ''
+        );
+
+        $hayFiltro = filled($categoria) || $cuenta !== null || $mes !== $mesActual;
+
+        $paginador = $gastos->appends($filtrosListado);
 
         $mesCompleto = $gastos->total() <= $rastro->count();
     @endphp
 
+    <nav class="espacio" aria-label="Espacio de los gastos">
+        <span class="espacio__etiqueta">Espacio</span>
+
+        <a
+            class="espacio__opcion{{ $ambito->esFamilia() ? '' : ' espacio__opcion--activo' }}"
+            href="{{ route('gastos.index', ['ambito' => 'personal']) }}"
+            @if (! $ambito->esFamilia()) aria-current="page" @endif
+        >Personal</a>
+
+        @if ($tieneHogar)
+            <a
+                class="espacio__opcion{{ $ambito->esFamilia() ? ' espacio__opcion--activo' : '' }}"
+                href="{{ route('gastos.index', ['ambito' => 'familia']) }}"
+                @if ($ambito->esFamilia()) aria-current="page" @endif
+            >Familia</a>
+        @else
+            <a class="espacio__enlace" href="{{ route('familia.index') }}">Crear o unirme a un hogar</a>
+        @endif
+    </nav>
+
     <form class="filtros" method="GET" action="{{ route('gastos.index') }}">
+        @if ($ambito->esFamilia())
+            <input type="hidden" name="ambito" value="familia">
+        @endif
+
         <div class="filtros__campo">
             <label class="filtros__etiqueta" for="filtro-mes">Mes</label>
             <input class="filtros__control" id="filtro-mes" name="mes" type="month" value="{{ $fechaMes->format('Y-m') }}" required>
@@ -64,16 +109,57 @@
             </select>
         </div>
 
+        <div class="filtros__campo">
+            <label class="filtros__etiqueta" for="filtro-cuenta">Cuenta</label>
+            <select class="filtros__control" id="filtro-cuenta" name="cuenta">
+                <option value="">Todas las cuentas</option>
+                @foreach ($cuentas as $opcion)
+                    <option value="{{ $opcion->id }}" @selected((int) ($cuenta?->id) === (int) $opcion->id)>{{ $opcion->nombre }}</option>
+                @endforeach
+            </select>
+        </div>
+
         <div class="filtros__acciones">
             <button class="boton boton--fantasma" type="submit">Filtrar</button>
-            @if ($categoria || $mes !== $mesActual)
-                <a class="filtros__limpiar" href="{{ route('gastos.index') }}">Quitar filtros</a>
+            @if ($hayFiltro)
+                <a class="filtros__limpiar" href="{{ route('gastos.index', $ambito->parametros()) }}">Quitar filtros</a>
             @endif
+
+            <div class="acciones-lista">
+                <a
+                    class="boton boton--fantasma acciones-lista__boton"
+                    href="{{ route('exportar.pdf', $filtrosExportar) }}"
+                    download
+                    aria-label="Descargar en PDF"
+                >
+                    <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" focusable="false">
+                        <path d="M8 2v7m0 0 3-3m-3 3L5 6M2.5 12.5h11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    PDF
+                </a>
+                <a
+                    class="boton boton--fantasma acciones-lista__boton"
+                    href="{{ route('exportar.excel', $filtrosExportar) }}"
+                    download
+                    aria-label="Descargar en Excel"
+                >
+                    <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" focusable="false">
+                        <path d="M8 2v7m0 0 3-3m-3 3L5 6M2.5 12.5h11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    Excel
+                </a>
+            </div>
         </div>
     </form>
 
     <section class="resumen" aria-labelledby="resumen-titulo">
-        <h1 class="resumen__titulo" id="resumen-titulo">Lo que llevas gastado en {{ $nombreMes }}</h1>
+        <h1 class="resumen__titulo" id="resumen-titulo">
+            @if ($ambito->esFamilia())
+                {{ $ambito->nombre() }} · lo que lleva gastado el hogar en {{ $nombreMes }}
+            @else
+                Lo que llevas gastado en {{ $nombreMes }}
+            @endif
+        </h1>
         <p class="resumen__total">{{ $dinero($totalMes) }}</p>
 
         @if ((float) $totalMes <= 0)
@@ -127,14 +213,22 @@
                 </g>
             </svg>
 
-            @if ($categoria)
-                <h2 class="vacio__titulo" id="vacio-titulo">No hay nada en «{{ $categoria }}» este mes</h2>
-                <p class="vacio__texto">Prueba con otro mes o quita el filtro para ver el rastro completo.</p>
-                <a class="boton boton--lleno" href="{{ route('gastos.index', ['mes' => $fechaMes->format('Y-m')]) }}">Ver todas las categorías</a>
+            @if ($categoria || $cuenta !== null)
+                <h2 class="vacio__titulo" id="vacio-titulo">
+                    @if ($categoria && $cuenta !== null)
+                        No hay nada en «{{ $categoria }}» dentro de «{{ $cuenta->nombre }}» este mes
+                    @elseif ($categoria)
+                        No hay nada en «{{ $categoria }}» este mes
+                    @else
+                        La cuenta «{{ $cuenta->nombre }}» no tiene gastos este mes
+                    @endif
+                </h2>
+                <p class="vacio__texto">Prueba con otro mes o quita los filtros para ver el rastro completo.</p>
+                <a class="boton boton--lleno" href="{{ route('gastos.index', array_merge(['mes' => $fechaMes->format('Y-m')], $ambito->parametros())) }}">Ver todo el mes</a>
             @else
                 <h2 class="vacio__titulo" id="vacio-titulo">El rastro está en blanco</h2>
                 <p class="vacio__texto">Anota el primer gasto del mes. Un café, el camión, la botana de la tarde: todo deja huella.</p>
-                <a class="boton boton--lleno" href="{{ route('gastos.create') }}">Anotar el primer gasto</a>
+                <a class="boton boton--lleno" href="{{ route('gastos.create', $ambito->parametros()) }}">Anotar el primer gasto</a>
             @endif
         </section>
     @else
@@ -153,12 +247,12 @@
                         class="rastro__pieza"
                         href="{{ route('gastos.show', $gasto) }}"
                         style="--peso: {{ max((float) $gasto->monto, 0.01) }}; --i: {{ $indice }};"
-                        aria-label="{{ $gasto->descripcion }}: {{ $dinero($gasto->monto) }}, {{ $gasto->categoria }}"
+                        aria-label="{{ $gasto->descripcion }}: {{ $dinero($gasto->monto) }}, {{ $gasto->categoria }}, cuenta {{ $gasto->cuenta?->nombre ?? 'sin cuenta' }}"
                     >
                         <span class="rastro__globo" aria-hidden="true">
                             <span class="rastro__globo-monto">{{ $dinero($gasto->monto) }}</span>
                             <span class="rastro__globo-desc">{{ $gasto->descripcion }}</span>
-                            <span class="rastro__globo-cat">{{ $gasto->categoria }}</span>
+                            <span class="rastro__globo-cat">{{ $gasto->categoria }} · {{ $gasto->cuenta?->nombre ?? 'Sin cuenta' }}</span>
                         </span>
                     </a>
                 @endforeach
@@ -204,7 +298,7 @@
 
             <table class="tabla-gastos">
                 <caption class="oculto">
-                    Gastos del mes con fecha, descripción, categoría y monto. La última columna enlaza a ver,
+                    Gastos del mes con fecha, descripción, categoría, cuenta y monto. La última columna enlaza a ver,
                     editar o eliminar cada gasto.
                 </caption>
                 <thead>
@@ -212,6 +306,7 @@
                         <th scope="col">Fecha</th>
                         <th scope="col">Qué</th>
                         <th scope="col">Categoría</th>
+                        <th scope="col">Cuenta</th>
                         <th scope="col" class="celda--monto">Monto</th>
                         <th scope="col"><span class="oculto">Acciones</span></th>
                     </tr>
@@ -247,6 +342,10 @@
                                     <span class="gasto__punto" style="background: {{ $colorCategoria((string) $gasto->categoria) }}" aria-hidden="true"></span>
                                     {{ $gasto->categoria }}
                                 </span>
+                            </td>
+
+                            <td class="tabla-gastos__celda celda--cuenta">
+                                <span class="gasto__cuenta">{{ $gasto->cuenta?->nombre ?? 'Sin cuenta' }}</span>
                             </td>
 
                             <td class="tabla-gastos__celda celda--monto">{{ $dinero($gasto->monto) }}</td>

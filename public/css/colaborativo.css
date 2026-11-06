@@ -1,0 +1,1098 @@
+/* ==========================================================================
+   Gastos Hormiga — hojas del hogar y de las cuentas
+   --------------------------------------------------------------------------
+   Dos pantallas nuevas sobre el mismo papel de app.css: la misma cal, el
+   mismo pino, la misma regla de 3px. Aquí solo se añade la estructura que
+   cada pantalla necesita.
+
+   Familia (fam-): la ficha de invitación es lo único oscuro de la app, como
+   el boleto que se arranca en un puesto. El código va en maíz sobre pino;
+   todo lo demás se queda en el papel claro.
+   Cuentas (cue-): una libreta de renglones. La tabla es la hoja; cada cuenta
+   lleva una barra fina que dice cuánto pesa en el mes, y la General se
+   distingue con una etiqueta, no con otro color de fila.
+
+   Prefijos: fam- y cue-. Nada de :root ni de fuentes nuevas.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Cabeceras de las dos pantallas
+   -------------------------------------------------------------------------- */
+.fam-cabeza,
+.cue-cabeza {
+    max-width: 720px;
+    margin-top: 22px;
+}
+
+.fam-cabeza__titulo,
+.cue-titulo {
+    font-family: var(--fuente-display);
+    font-size: clamp(1.9rem, 4.4vw, 2.7rem);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+}
+
+.fam-cabeza__bajada,
+.cue-bajada {
+    max-width: 58ch;
+    margin-top: 10px;
+    color: var(--humo);
+    font-size: 1.02rem;
+    line-height: 1.55;
+}
+
+.fam-cabeza__meta {
+    margin-top: 8px;
+    color: var(--humo);
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   2. Sin hogar: dos puertas, una para crear y otra para unirse
+   -------------------------------------------------------------------------- */
+.fam-errores {
+    margin-top: 24px;
+}
+
+.fam-puertas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 26px;
+}
+
+.fam-puerta {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: clamp(18px, 3vw, 24px);
+    background: var(--blanco);
+    border: 1px solid var(--linea);
+    border-top: 3px solid var(--pino);
+    border-radius: 0 0 var(--radio) var(--radio);
+}
+
+.fam-puerta--unirse {
+    background: transparent;
+    border-style: dashed;
+    border-top: 3px solid var(--maiz);
+}
+
+.fam-puerta__titulo {
+    font-family: var(--fuente-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.fam-puerta__texto {
+    max-width: 42ch;
+    color: var(--humo);
+    font-size: 0.94rem;
+    line-height: 1.5;
+}
+
+.fam-form {
+    display: grid;
+    gap: 14px;
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+.fam-puerta .boton {
+    justify-self: start;
+}
+
+.fam-form__codigo {
+    text-transform: uppercase;
+    font-family: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+    font-size: 1.04rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+.fam-nota {
+    max-width: 62ch;
+    margin-top: 22px;
+    color: var(--humo);
+    font-size: 0.92rem;
+    line-height: 1.55;
+}
+
+.fam-nota a,
+.fam-enlace {
+    color: var(--jamaica-hondo);
+    font-weight: 700;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.fam-nota a:hover,
+.fam-enlace:hover {
+    color: var(--jamaica);
+}
+
+/* --------------------------------------------------------------------------
+   3. La ficha de invitación: el boleto del hogar
+   -------------------------------------------------------------------------- */
+.fam-ficha {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 264px;
+    margin-top: 26px;
+    background: var(--pino);
+    border-radius: var(--radio);
+    color: var(--cal);
+    overflow: hidden;
+}
+
+.fam-ficha__cuerpo {
+    min-width: 0;
+    padding: clamp(18px, 3vw, 26px);
+}
+
+.fam-ficha__rotulo {
+    color: var(--verdin);
+    font-family: var(--fuente-texto);
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.fam-ficha__codigo {
+    margin-top: 4px;
+    color: var(--maiz);
+    font-family: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+    font-size: clamp(1.9rem, 5.4vw, 2.7rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.12;
+    overflow-wrap: anywhere;
+}
+
+.fam-ficha__codigo code {
+    font: inherit;
+}
+
+.fam-ficha__nota {
+    max-width: 48ch;
+    margin-top: 8px;
+    color: var(--verdin);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.fam-ficha__lado {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+    padding: clamp(18px, 3vw, 26px);
+    border-left: 2px dashed #4F6C62;
+}
+
+.fam-boton-claro {
+    min-height: 40px;
+    padding: 9px 16px;
+    background: transparent;
+    border: 1.5px solid var(--verdin);
+    color: var(--cal);
+}
+
+.fam-boton-claro:hover {
+    background: var(--cal);
+    border-color: var(--cal);
+    color: var(--pino);
+}
+
+.fam-ficha__estado {
+    max-width: 26ch;
+    min-height: 1.3em;
+    color: var(--maiz);
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
+.fam-ficha__regenerar {
+    margin: 0;
+}
+
+.fam-enlace-claro {
+    padding: 6px 0;
+    background: none;
+    border: 0;
+    color: var(--verdin);
+    cursor: pointer;
+    font-family: var(--fuente-texto);
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.fam-enlace-claro:hover {
+    color: var(--cal);
+}
+
+/* El anillo de foco de app.css es jamaica; sobre pino no alcanza. */
+.fam-ficha :focus-visible {
+    outline-color: var(--maiz);
+}
+
+/* --------------------------------------------------------------------------
+   4. Hogar con datos: resumen, reparto, gente, cuentas y acciones
+   -------------------------------------------------------------------------- */
+.fam-rejilla {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+    align-items: start;
+    gap: clamp(24px, 4vw, 44px);
+    margin-top: 36px;
+}
+
+.fam-columna {
+    display: grid;
+    gap: 36px;
+    min-width: 0;
+}
+
+.fam-lado {
+    display: grid;
+    gap: 22px;
+    min-width: 0;
+}
+
+.fam-bloque {
+    min-width: 0;
+}
+
+.fam-bloque__cabeza {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px 16px;
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid var(--linea-fuerte);
+}
+
+.fam-bloque__cuenta {
+    color: var(--humo);
+    font-size: 0.86rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.fam-bloque__titulo {
+    font-family: var(--fuente-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+}
+
+.fam-total {
+    margin-top: 14px;
+    font-family: var(--fuente-display);
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+}
+
+.fam-datos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 20px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--linea);
+}
+
+.fam-subtitulo {
+    margin-top: 24px;
+    color: var(--humo);
+    font-family: var(--fuente-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.fam-vacio-texto {
+    max-width: 52ch;
+    margin-top: 18px;
+    color: var(--humo);
+    font-size: 0.95rem;
+    line-height: 1.55;
+}
+
+.fam-reparto {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 0;
+    list-style: none;
+}
+
+.fam-reparto__fila {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+        "nombre monto parte"
+        "barra barra barra";
+    align-items: center;
+    gap: 4px 12px;
+}
+
+.fam-reparto__nombre {
+    grid-area: nombre;
+    font-size: 0.95rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.fam-reparto__monto {
+    grid-area: monto;
+    font-family: var(--fuente-display);
+    font-size: 0.98rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.fam-reparto__parte {
+    grid-area: parte;
+    min-width: 3.4em;
+    color: var(--humo);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.fam-reparto__barra {
+    grid-area: barra;
+    display: block;
+    height: 4px;
+    overflow: hidden;
+    background: var(--verdin);
+}
+
+.fam-reparto__relleno {
+    display: block;
+    height: 100%;
+    background: var(--pino);
+}
+
+.fam-gente {
+    display: grid;
+    margin-top: 2px;
+    padding: 0;
+    list-style: none;
+}
+
+.fam-gente__fila {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--linea);
+}
+
+.fam-gente__fila:last-child {
+    border-bottom: 0;
+}
+
+.fam-gente__inicial {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    background: var(--pino);
+    border-radius: 50%;
+    color: var(--cal);
+    font-family: var(--fuente-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.fam-gente__datos {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+}
+
+.fam-gente__nombre {
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.fam-gente__correo {
+    color: var(--humo);
+    font-size: 0.84rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.fam-gente__etiqueta {
+    flex: none;
+    margin-left: auto;
+    padding: 2px 9px 3px;
+    background: var(--maiz);
+    border-radius: 999px;
+    color: var(--pino);
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.fam-cuentas {
+    display: grid;
+    margin-top: 2px;
+    padding: 0;
+    list-style: none;
+}
+
+.fam-cuentas__fila {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--linea);
+}
+
+.fam-cuentas__fila:last-child {
+    border-bottom: 0;
+}
+
+.fam-cuentas__nombre {
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+}
+
+/* --- 4.1 Acciones al pie --------------------------------------------------- */
+.fam-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px 32px;
+    margin-top: 40px;
+    padding-top: 18px;
+    border-top: 3px solid var(--pino);
+}
+
+.fam-acciones__principal {
+    display: grid;
+    gap: 8px;
+    max-width: 46ch;
+}
+
+.fam-acciones__principal .boton {
+    justify-self: start;
+}
+
+.fam-acciones__peligro {
+    display: grid;
+    gap: 8px;
+    justify-items: start;
+    max-width: 340px;
+}
+
+.fam-acciones__form {
+    margin: 0;
+}
+
+.fam-acciones__nota {
+    color: var(--humo);
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   5. Cuentas: espacio, totales y rejilla
+   -------------------------------------------------------------------------- */
+.cue-ambitos {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px 24px;
+    margin-top: 24px;
+    border-bottom: 1px solid var(--linea);
+}
+
+.cue-ambito {
+    padding: 7px 0 8px;
+    margin-bottom: -1px;
+    border-bottom: 3px solid transparent;
+    color: var(--humo);
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: color var(--transicion), border-color var(--transicion);
+}
+
+.cue-ambito:hover {
+    color: var(--jamaica);
+    border-bottom-color: var(--linea-fuerte);
+}
+
+.cue-ambito--activo,
+.cue-ambito[aria-current="page"] {
+    color: var(--pino);
+    border-bottom-color: var(--maiz);
+}
+
+.cue-ambito--activo:hover,
+.cue-ambito[aria-current="page"]:hover {
+    color: var(--pino);
+    border-bottom-color: var(--maiz);
+}
+
+.cue-ambito--inactivo {
+    color: var(--humo);
+    cursor: not-allowed;
+    opacity: 0.7;
+    text-decoration: none;
+}
+
+.cue-ambito--inactivo:hover {
+    color: var(--humo);
+    border-bottom-color: transparent;
+}
+
+.cue-contexto {
+    margin-top: 12px;
+    color: var(--humo);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.cue-contexto strong {
+    color: var(--pino);
+}
+
+.cue-contexto a {
+    color: var(--jamaica-hondo);
+    font-weight: 700;
+}
+
+.cue-errores {
+    max-width: 720px;
+    margin-top: 22px;
+}
+
+.cue-totales {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px 24px;
+    margin-top: 24px;
+    padding-top: 14px;
+    border-top: 3px solid var(--pino);
+}
+
+.cue-rejilla {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+    gap: clamp(24px, 4vw, 40px);
+    margin-top: 34px;
+}
+
+.cue-lista {
+    min-width: 0;
+}
+
+.cue-lista__cabeza {
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid var(--linea-fuerte);
+}
+
+.cue-lista__nota {
+    max-width: 62ch;
+    margin-top: 5px;
+    color: var(--humo);
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   6. Tabla de cuentas (escritorio) y tarjetas (≤760px, como .tabla-gastos)
+   -------------------------------------------------------------------------- */
+.cue-tabla {
+    width: 100%;
+    margin-top: 6px;
+    border-collapse: collapse;
+}
+
+.cue-tabla th {
+    padding: 12px 12px 9px;
+    border-bottom: 1px solid var(--linea);
+    color: var(--humo);
+    font-family: var(--fuente-texto);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: left;
+}
+
+.cue-tabla th.cue-celda--num {
+    text-align: right;
+}
+
+.cue-tabla th:first-child,
+.cue-tabla td:first-child {
+    padding-left: 0;
+}
+
+.cue-tabla th:last-child,
+.cue-tabla td:last-child {
+    padding-right: 0;
+}
+
+.cue-fila {
+    border-bottom: 1px solid var(--linea);
+    transition: background-color 140ms ease;
+}
+
+.cue-fila:hover {
+    background: #E9EFE3;
+}
+
+.cue-celda {
+    padding: 13px 12px;
+    vertical-align: top;
+}
+
+.cue-celda--cuenta {
+    padding-top: 14px;
+}
+
+.cue-cuenta__linea {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+}
+
+.cue-cuenta__nombre {
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.cue-cuenta__etiqueta {
+    flex: none;
+    padding: 1px 8px 2px;
+    background: var(--verdin);
+    border-radius: 999px;
+    color: var(--pino);
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.cue-cuenta__barra {
+    display: block;
+    max-width: 220px;
+    height: 3px;
+    margin-top: 7px;
+    overflow: hidden;
+    background: var(--verdin);
+}
+
+.cue-cuenta__relleno {
+    display: block;
+    height: 100%;
+    background: var(--pino);
+}
+
+.cue-celda--num {
+    padding-top: 15px;
+    font-family: var(--fuente-display);
+    font-size: 0.98rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.cue-celda--acciones {
+    padding-top: 9px;
+    text-align: right;
+}
+
+/* --- 6.1 Renombrar y eliminar, plegados en cada renglón -------------------- */
+.cue-editar {
+    position: relative;
+    display: inline-block;
+    text-align: right;
+}
+
+.cue-editar__disparador {
+    display: inline-block;
+    padding: 5px 2px;
+    color: var(--pino);
+    cursor: pointer;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.3;
+    list-style: none;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.cue-editar__disparador::-webkit-details-marker {
+    display: none;
+}
+
+.cue-editar__disparador::marker {
+    content: "";
+}
+
+.cue-editar__disparador:hover {
+    color: var(--jamaica);
+}
+
+.cue-editar[open] .cue-editar__disparador {
+    color: var(--jamaica-hondo);
+}
+
+.cue-editar__panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 20;
+    width: 288px;
+    padding: 12px;
+    background: var(--blanco);
+    border: 1px solid var(--linea);
+    border-top: 3px solid var(--pino);
+    border-radius: 0 0 var(--radio) var(--radio);
+    box-shadow: 0 14px 26px -18px rgba(14, 59, 54, 0.55);
+    text-align: left;
+}
+
+.cue-editar__form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.cue-editar__control {
+    flex: 1 1 140px;
+    min-width: 0;
+    padding: 8px 9px;
+    font-size: 0.9rem;
+}
+
+.cue-editar__guardar {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: 0.84rem;
+}
+
+.cue-editar__borrar {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--linea);
+}
+
+.cue-editar__borrar .accion {
+    padding: 6px 0;
+}
+
+.cue-editar__nota {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--linea);
+    color: var(--humo);
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+/* --------------------------------------------------------------------------
+   7. Alta de cuenta y estado vacío
+   -------------------------------------------------------------------------- */
+.cue-alta {
+    padding: 20px;
+    background: var(--verdin);
+    border-top: 3px solid var(--maiz);
+}
+
+.cue-alta__titulo {
+    font-family: var(--fuente-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+}
+
+.cue-alta__texto {
+    margin-top: 6px;
+    color: var(--humo);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.cue-form {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.cue-form .boton {
+    width: 100%;
+}
+
+.cue-alta__nota {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--linea-fuerte);
+    color: var(--humo);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.cue-vacio {
+    max-width: 620px;
+    margin-top: 26px;
+    padding: clamp(18px, 3vw, 26px);
+}
+
+.cue-vacio__ejemplos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cue-vacio__ejemplos li {
+    padding: 3px 10px 4px;
+    background: var(--blanco);
+    border: 1px dashed var(--linea-fuerte);
+    border-radius: 2px;
+    color: var(--humo);
+    font-size: 0.84rem;
+}
+
+/* --------------------------------------------------------------------------
+   8. Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+    .fam-ficha {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .fam-ficha__lado {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px 18px;
+        border-top: 2px dashed #4F6C62;
+        border-left: 0;
+    }
+
+    .fam-ficha__estado {
+        flex-basis: 100%;
+        max-width: none;
+    }
+
+    .fam-rejilla,
+    .cue-rejilla {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cue-lado {
+        order: -1;
+    }
+
+    .cue-lista__nota {
+        max-width: 70ch;
+    }
+}
+
+@media (max-width: 760px) {
+    .fam-puertas {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+
+    .fam-cabeza__titulo,
+    .cue-titulo {
+        font-size: 1.8rem;
+    }
+
+    .fam-datos,
+    .cue-totales {
+        gap: 12px 16px;
+    }
+
+    .fam-acciones {
+        flex-direction: column;
+        gap: 18px;
+        margin-top: 34px;
+    }
+
+    .fam-acciones__principal,
+    .fam-acciones__peligro {
+        max-width: none;
+    }
+
+    /* Tabla → tarjetas apiladas, el mismo patrón de .tabla-gastos. */
+    .cue-tabla {
+        display: block;
+        margin-top: 14px;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .cue-tabla thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .cue-tabla tbody {
+        display: block;
+    }
+
+    .cue-fila {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px 12px;
+        margin-top: 12px;
+        padding: 13px 14px 12px;
+        background: var(--blanco);
+        border: 1px solid var(--linea);
+        border-radius: 2px;
+    }
+
+    .cue-fila:hover {
+        background: var(--blanco);
+    }
+
+    .cue-celda {
+        display: block;
+        padding: 0;
+    }
+
+    .cue-tabla th:first-child,
+    .cue-tabla td:first-child,
+    .cue-tabla th:last-child,
+    .cue-tabla td:last-child {
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .cue-celda--cuenta {
+        grid-column: 1 / -1;
+    }
+
+    .cue-cuenta__barra {
+        max-width: none;
+    }
+
+    .cue-celda--num {
+        padding-top: 0;
+        font-size: 0.95rem;
+        text-align: left;
+    }
+
+    .cue-celda--num::before {
+        display: block;
+        margin-bottom: 2px;
+        color: var(--humo);
+        content: attr(data-label);
+        font-family: var(--fuente-texto);
+        font-size: 0.72rem;
+        font-weight: 700;
+        white-space: normal;
+    }
+
+    .cue-celda--acciones {
+        grid-column: 1 / -1;
+        margin-top: 4px;
+        padding-top: 9px;
+        border-top: 1px solid var(--linea);
+        text-align: left;
+    }
+
+    .cue-editar {
+        display: block;
+        text-align: left;
+    }
+
+    .cue-editar__disparador {
+        padding: 7px 0;
+    }
+
+    .cue-editar__panel {
+        position: static;
+        width: 100%;
+        margin-top: 8px;
+        padding: 10px 0 0;
+        background: transparent;
+        border: 0;
+        border-top: 1px solid var(--linea);
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .cue-editar__control {
+        flex: 1 1 60%;
+    }
+}
+
+@media (max-width: 560px) {
+    .cue-totales {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cue-celda--num {
+        font-size: 0.9rem;
+    }
+
+    .fam-puerta {
+        padding: 16px;
+    }
+
+    .fam-ficha__codigo {
+        font-size: 1.7rem;
+        letter-spacing: 0.1em;
+    }
+
+    .fam-puerta .boton {
+        justify-self: stretch;
+    }
+}
+
+/* El nav de cinco enlaces sigue saltando de renglón; a 360px solo se aprieta
+   el espacio entre ellos, sin fijar anchos ni nowrap. */
+@media (max-width: 380px) {
+    .nav-principal {
+        gap: 0 11px;
+    }
+
+    .cue-celda--num {
+        font-size: 0.86rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cue-fila,
+    .cue-ambito,
+    .cue-editar__disparador {
+        transition: none;
+    }
+}

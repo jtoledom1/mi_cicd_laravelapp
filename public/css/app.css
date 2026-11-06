@@ -1580,3 +1580,715 @@ input[type="number"] {
         scroll-behavior: auto !important;
     }
 }
+
+/* --------------------------------------------------------------------------
+   20. Cabecera privada, menú de cuenta y portada de entrada
+   --------------------------------------------------------------------------
+   Dos piezas nuevas en la cabecera. La nav de tres enlaces se apoya en la
+   misma regla de 3px del sistema: el enlace activo lleva maíz, no jamaica,
+   para no competir con el botón de anotar. La cuenta vive en un <details>,
+   así que abre, cierra y se recorre con teclado sin una línea de JavaScript
+   obligatoria.
+
+   Las pantallas de entrada no son un panel de SaaS. Son la portada de la
+   libreta: la marca, el rastro de bloques diminutos y la regla de 3px arman
+   la hoja, y el formulario se apoya directamente en el papel. El rastro es
+   el único elemento memorable y va estático: una fila de hormigas cruzando
+   bajo la marca, cada bloque del tamaño de un gasto chico distinto.
+   -------------------------------------------------------------------------- */
+
+/* --- 20.1 Navegación principal ------------------------------------------- */
+.nav-principal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 20px;
+    margin-left: clamp(4px, 2vw, 26px);
+}
+
+.nav-principal__enlace {
+    padding: 6px 0 4px;
+    border-bottom: 3px solid transparent;
+    color: var(--humo);
+    font-size: 0.93rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: color var(--transicion), border-color var(--transicion);
+}
+
+.nav-principal__enlace:hover {
+    color: var(--jamaica);
+    border-bottom-color: var(--linea-fuerte);
+}
+
+.nav-principal__enlace--activo,
+.nav-principal__enlace[aria-current="page"] {
+    color: var(--pino);
+    border-bottom-color: var(--maiz);
+}
+
+.nav-principal__enlace--activo:hover,
+.nav-principal__enlace[aria-current="page"]:hover {
+    color: var(--pino);
+    border-bottom-color: var(--maiz);
+}
+
+/* --- 20.2 Menú de cuenta -------------------------------------------------- */
+.usuario {
+    position: relative;
+}
+
+.usuario__disparador {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 5px 9px 5px 5px;
+    background: transparent;
+    border: 1.5px solid var(--linea-fuerte);
+    border-radius: var(--radio);
+    color: var(--pino);
+    font-family: var(--fuente-texto);
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.2;
+    list-style: none;
+    cursor: pointer;
+    transition: background-color var(--transicion), border-color var(--transicion);
+}
+
+.usuario__disparador::-webkit-details-marker {
+    display: none;
+}
+
+.usuario__disparador::marker {
+    content: "";
+}
+
+.usuario__disparador:hover,
+.usuario[open] .usuario__disparador {
+    background: var(--blanco);
+    border-color: var(--pino);
+}
+
+.usuario__inicial {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    background: var(--pino);
+    border-radius: 2px;
+    color: var(--cal);
+    font-family: var(--fuente-display);
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.usuario__nombre {
+    max-width: 16ch;
+    overflow: hidden;
+    font-family: var(--fuente-display);
+    letter-spacing: -0.01em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.usuario__chevron {
+    flex: none;
+    color: var(--humo);
+    transition: transform var(--transicion);
+}
+
+.usuario[open] .usuario__chevron {
+    transform: rotate(180deg);
+}
+
+.usuario__panel {
+    position: absolute;
+    top: calc(100% + 9px);
+    right: 0;
+    z-index: 30;
+    display: grid;
+    gap: 2px;
+    width: max-content;
+    min-width: 236px;
+    max-width: min(84vw, 320px);
+    padding: 13px 14px 14px;
+    background: var(--blanco);
+    border: 1px solid var(--linea);
+    border-top: 3px solid var(--pino);
+    border-radius: 0 0 var(--radio) var(--radio);
+    box-shadow: 0 14px 26px -18px rgba(14, 59, 54, 0.55);
+}
+
+.usuario__panel .usuario__nombre {
+    max-width: 100%;
+    padding-top: 2px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.usuario__correo {
+    overflow-wrap: anywhere;
+    color: var(--humo);
+    font-size: 0.84rem;
+    line-height: 1.35;
+}
+
+.usuario__salir {
+    margin-top: 11px;
+    padding-top: 11px;
+    border-top: 1px solid var(--linea);
+}
+
+.usuario__salir .boton {
+    width: 100%;
+    min-height: 38px;
+    font-size: 0.88rem;
+}
+
+/* --- 20.3 Portada de entrada (login y registro) --------------------------- */
+.auth {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(26px, 5vh, 46px);
+    min-height: 100vh;
+    min-height: 100svh;
+    padding: clamp(30px, 7vh, 78px) var(--pagina) clamp(24px, 5vh, 54px);
+}
+
+.auth__panel {
+    width: 100%;
+    max-width: 440px;
+}
+
+.auth__marca {
+    display: flex;
+    width: fit-content;
+    margin-bottom: 18px;
+}
+
+/* El rastro se apoya en su propia regla de 3px: hormigas sobre un cable. */
+.auth__rastro {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 4px;
+    height: 22px;
+    border-bottom: 3px solid var(--pino);
+}
+
+.auth__rastro span {
+    display: block;
+    flex: none;
+    width: 5px;
+    height: var(--alto, 8px);
+    background: var(--pino);
+    border-radius: 1px 1px 0 0;
+}
+
+/* Un solo bloque de maíz: el gasto que sí se nota. */
+.auth__rastro span:nth-child(9) {
+    background: var(--maiz);
+}
+
+.auth__titulo {
+    margin-top: clamp(24px, 4vw, 32px);
+    font-family: var(--fuente-display);
+    font-size: clamp(2rem, 6.2vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 0.98;
+}
+
+.auth__entrada {
+    max-width: 34ch;
+    margin-top: 10px;
+    margin-bottom: clamp(24px, 4vw, 30px);
+    color: var(--humo);
+    font-size: 1.03rem;
+    line-height: 1.5;
+}
+
+.auth__form {
+    display: grid;
+    gap: 18px;
+}
+
+.auth__enviar {
+    width: 100%;
+    min-height: 46px;
+    margin-top: 4px;
+    font-size: 1rem;
+}
+
+.auth__alterno {
+    margin-top: 26px;
+    padding-top: 16px;
+    border-top: 1px solid var(--linea);
+    color: var(--humo);
+    font-size: 0.95rem;
+}
+
+.auth__alterno a {
+    color: var(--jamaica-hondo);
+    font-weight: 700;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+}
+
+.auth__alterno a:hover {
+    color: var(--jamaica);
+}
+
+.auth__pie {
+    color: var(--humo);
+    font-size: 0.8rem;
+    letter-spacing: 0.01em;
+}
+
+/* Casilla "Recordarme": el acento de jamaica también en el control nativo. */
+.recordar {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: 9px;
+    min-height: 34px;
+    color: var(--pino);
+    font-size: 0.94rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.recordar input {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--jamaica);
+    cursor: pointer;
+}
+
+/* Texto de apoyo bajo un control, con el mismo humo del resto del sistema. */
+.campo__ayuda {
+    color: var(--humo);
+    font-size: 0.84rem;
+    line-height: 1.35;
+}
+
+/* --------------------------------------------------------------------------
+   21. Responsive de la cabecera privada y de la portada
+   -------------------------------------------------------------------------- */
+@media (max-width: 760px) {
+    .cabecera__interior {
+        gap: 8px 12px;
+    }
+
+    /* La nav salta a su propio renglón en vez de apretar la marca. */
+    .nav-principal {
+        order: 3;
+        width: 100%;
+        margin-left: 0;
+        gap: 0 18px;
+    }
+
+    .cabecera__nav {
+        order: 2;
+        gap: 8px 10px;
+    }
+
+    .nav-principal__enlace {
+        padding: 8px 0 5px;
+        font-size: 0.9rem;
+    }
+
+    /* El nombre se va del disparador; el panel lo sigue mostrando entero. */
+    .usuario__disparador .usuario__nombre {
+        display: none;
+    }
+
+    .usuario__disparador {
+        gap: 6px;
+        padding: 5px 7px;
+    }
+
+    .usuario__panel {
+        min-width: 220px;
+    }
+}
+
+@media (max-width: 560px) {
+    .cabecera__cta-largo {
+        display: none;
+    }
+
+    .marca__texto {
+        font-size: 1rem;
+    }
+
+    .nav-principal {
+        gap: 0 14px;
+    }
+
+    .nav-principal__enlace {
+        font-size: 0.88rem;
+    }
+
+    .usuario__disparador {
+        min-height: 40px;
+    }
+
+    .auth {
+        justify-content: flex-start;
+        gap: 24px;
+        padding-block: 28px 32px;
+    }
+
+    .auth__rastro {
+        height: 18px;
+    }
+
+    .auth__rastro span {
+        width: 4px;
+    }
+
+    .auth__titulo {
+        margin-top: 22px;
+        font-size: 1.9rem;
+    }
+
+    .auth__entrada {
+        margin-bottom: 24px;
+        font-size: 1rem;
+    }
+
+    .auth__enviar {
+        min-height: 44px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   22. Espacio (personal / familia), exportación y cuenta del gasto
+   --------------------------------------------------------------------------
+   Tres piezas que se suman a la libreta sin cambiarle el tono:
+
+   - `.espacio` es el conmutador de cajón: dos pestañas rectas, la activa en
+     pino macizo, para saber de quién es el dinero antes de leer la cifra.
+   - `.acciones-lista` son las dos descargas, apoyadas en el mismo fantasma
+     de los filtros: no compiten con la acción de anotar.
+   - `.gasto__cuenta` es una anotación al margen: humo, tamaño de nota, sin
+     peso visual, pero siempre a la vista.
+
+   Todo se apoya en los tokens de la sección 1; no se redefinió ninguno.
+   -------------------------------------------------------------------------- */
+
+/* --- 22.1 Selector de espacio -------------------------------------------- */
+.espacio {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 18px;
+}
+
+.espacio__etiqueta {
+    margin-right: 2px;
+    color: var(--humo);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.espacio__opcion {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 5px 14px;
+    background: transparent;
+    border: 1.5px solid var(--linea-fuerte);
+    border-radius: 2px;
+    color: var(--humo);
+    font-family: var(--fuente-texto);
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.1;
+    text-decoration: none;
+    transition: background-color var(--transicion), border-color var(--transicion), color var(--transicion);
+}
+
+.espacio__opcion:hover {
+    background: var(--verdin);
+    border-color: var(--pino);
+    color: var(--pino);
+}
+
+.espacio__opcion--activo,
+.espacio__opcion[aria-current="page"] {
+    background: var(--pino);
+    border-color: var(--pino);
+    color: var(--cal);
+}
+
+.espacio__opcion--activo:hover,
+.espacio__opcion[aria-current="page"]:hover {
+    background: var(--pino);
+    border-color: var(--pino);
+    color: var(--cal);
+}
+
+.espacio__opcion--activo:focus-visible,
+.espacio__opcion[aria-current="page"]:focus-visible {
+    outline-color: var(--pino);
+    outline-offset: 3px;
+}
+
+/* Sin hogar todavía: el enlace invita, no reclama el sitio de una pestaña. */
+.espacio__enlace {
+    margin-left: 4px;
+    color: var(--humo);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+.espacio__enlace:hover {
+    color: var(--jamaica);
+}
+
+/* --- 22.2 Descargas del listado ------------------------------------------ */
+.acciones-lista {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.acciones-lista__boton {
+    min-height: 36px;
+    padding: 7px 11px;
+    font-size: 0.84rem;
+    letter-spacing: 0.01em;
+}
+
+.acciones-lista__boton svg {
+    flex: none;
+    opacity: 0.8;
+    transition: opacity var(--transicion);
+}
+
+.acciones-lista__boton:hover svg,
+.acciones-lista__boton:focus-visible svg {
+    opacity: 1;
+}
+
+/* --- 22.3 La cuenta de cada gasto ---------------------------------------- */
+.celda--cuenta {
+    padding-top: 15px;
+}
+
+.gasto__cuenta {
+    display: inline-block;
+    max-width: 22ch;
+    color: var(--humo);
+    font-size: 0.9rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+a.gasto__cuenta {
+    text-decoration-color: var(--linea-fuerte);
+    text-underline-offset: 3px;
+}
+
+a.gasto__cuenta:hover {
+    color: var(--jamaica);
+}
+
+/* --- 22.4 Nota de gasto compartido en el formulario ---------------------- */
+.form-gasto__familia {
+    margin: 0;
+    padding: 11px 13px;
+    background: var(--jamaica-tenue);
+    border-left: 3px solid var(--jamaica);
+    color: var(--pino);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.form-gasto__familia strong {
+    color: var(--jamaica-hondo);
+}
+
+/* Aviso dentro de un campo: cuando todavía no hay de dónde elegir. */
+.campo__aviso {
+    padding: 9px 11px;
+    background: var(--verdin);
+    border-left: 3px solid var(--pino);
+    color: var(--pino);
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+
+.campo__aviso a {
+    color: var(--jamaica-hondo);
+    font-weight: 700;
+}
+
+/* Los enlaces de ayuda del formulario sí llevan el acento de acción. */
+.form-gasto .campo__ayuda a {
+    color: var(--jamaica-hondo);
+    font-weight: 700;
+}
+
+/* --- 22.5 Ficha: espacio, cuenta y quién lo anotó ------------------------ */
+.ficha__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    margin-bottom: 12px;
+}
+
+.ficha__espacio {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    background: var(--verdin);
+    border: 1px solid var(--linea);
+    border-radius: 2px;
+    color: var(--pino);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    line-height: 1.3;
+    text-transform: uppercase;
+}
+
+.ficha__espacio--hogar {
+    background: var(--jamaica-tenue);
+    border-color: #E7C3CF;
+    color: var(--jamaica-hondo);
+}
+
+.ficha__cuenta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    font-size: 0.88rem;
+}
+
+.ficha__cuenta svg {
+    flex: none;
+    color: var(--humo);
+}
+
+.ficha__quien {
+    margin-top: 10px;
+    color: var(--humo);
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.ficha__quien strong {
+    color: var(--pino);
+}
+
+.ficha__quien-nota {
+    color: var(--humo);
+}
+
+/* --------------------------------------------------------------------------
+   23. Ajustes finos de lo anterior en pantallas chicas
+   -------------------------------------------------------------------------- */
+@media (max-width: 760px) {
+    .espacio {
+        margin-top: 14px;
+        gap: 5px;
+    }
+
+    .espacio__opcion {
+        min-height: 34px;
+        padding: 6px 12px;
+    }
+
+    /* La cuenta comparte renglón con la categoría en la lista apilada. */
+    .tabla-gastos__fila {
+        grid-template-areas:
+            "fecha monto"
+            "que que"
+            "cat cuenta"
+            "acc acc";
+    }
+
+    .celda--cuenta {
+        grid-area: cuenta;
+        justify-self: end;
+        max-width: 17ch;
+        padding-top: 0;
+        text-align: right;
+    }
+
+    .gasto__cuenta {
+        max-width: 100%;
+        font-size: 0.84rem;
+    }
+
+    .ficha__meta {
+        margin-bottom: 10px;
+    }
+
+    .ficha__espacio {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 560px) {
+    .espacio__etiqueta {
+        flex-basis: 100%;
+        margin-bottom: 1px;
+    }
+
+    .espacio__opcion {
+        flex: 1 1 0%;
+        padding: 9px 10px;
+        font-size: 0.86rem;
+    }
+
+    .espacio__enlace {
+        flex-basis: 100%;
+        margin-left: 0;
+        padding-block: 3px;
+    }
+
+    /* Las descargas se van a su propio renglón y se reparten el ancho. */
+    .acciones-lista {
+        width: 100%;
+        margin-left: 0;
+        gap: 8px;
+    }
+
+    .acciones-lista__boton {
+        flex: 1 1 0%;
+        justify-content: center;
+        min-height: 38px;
+    }
+
+    .form-gasto__familia {
+        font-size: 0.88rem;
+    }
+
+    .ficha__cuenta {
+        font-size: 0.84rem;
+    }
+}

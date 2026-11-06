@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\GastoHormiga;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -28,6 +29,7 @@ class GastoHormigaFactory extends Factory
         [$montoMinimo, $montoMaximo] = $this->rangoDeMonto($categoria);
 
         return [
+            'user_id' => User::factory(),
             'descripcion' => fake()->randomElement($this->descripcionesPorCategoria()[$categoria]),
             'monto' => fake()->randomFloat(2, $montoMinimo, $montoMaximo),
             'categoria' => $categoria,

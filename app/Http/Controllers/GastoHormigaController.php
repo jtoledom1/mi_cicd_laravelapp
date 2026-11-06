@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GastoRequest;
+use App\Models\Cuenta;
 use App\Models\GastoHormiga;
+use App\Models\User;
+use App\Servicios\Ambito;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -13,35 +16,39 @@ use Illuminate\View\View;
 class GastoHormigaController extends Controller
 {
     /**
-     * Muestra los gastos del mes activo junto con los totales del resumen.
+     * Listado del mes con el resumen del ámbito activo (personal o familia).
      */
     public function index(Request $request): View
     {
+        $usuario = $request->user();
+        $ambito = Ambito::desde($request, $usuario);
         $mes = $this->mesActivo($request);
         $categoria = $this->categoriaActiva($request);
+        $cuenta = $this->cuentaActiva($request, $ambito, $usuario);
 
-        $gastos = GastoHormiga::query()
+        $gastos = $ambito->gastos($usuario)
             ->delMes($mes)
             ->when(
                 $categoria !== null,
                 fn (Builder $consulta): Builder => $consulta->where('categoria', $categoria)
+            )
+            ->when(
+                $cuenta !== null,
+                fn (Builder $consulta): Builder => $consulta->where('cuenta_id', $cuenta->id)
             )
             ->orderByDesc('fecha')
             ->orderByDesc('id')
             ->paginate(12)
             ->withQueryString();
 
-        $totalMes = (float) GastoHormiga::query()->delMes($mes)->sum('monto');
-        $cantidadMes = GastoHormiga::query()->delMes($mes)->count();
+        $totalMes = (float) $this->conCuenta($ambito->gastos($usuario)->delMes($mes), $cuenta)->sum('monto');
+        $cantidadMes = $this->conCuenta($ambito->gastos($usuario)->delMes($mes), $cuenta)->count();
 
-        $totalHoy = (float) GastoHormiga::query()
-            ->whereDate('fecha', today()->toDateString())
-            ->sum('monto');
+        $totalHoy = (float) $this->conCuenta($ambito->gastos($usuario)->whereDate('fecha', today()->toDateString()), $cuenta)->sum('monto');
 
         $promedioDiario = $totalMes / max(1, $this->diasBaseParaPromedio($mes));
 
-        $porCategoria = GastoHormiga::query()
-            ->delMes($mes)
+        $porCategoria = $this->conCuenta($ambito->gastos($usuario)->delMes($mes), $cuenta)
             ->selectRaw('categoria, SUM(monto) as total')
             ->groupBy('categoria')
             ->orderByDesc('total')
@@ -52,6 +59,9 @@ class GastoHormigaController extends Controller
             'gastos' => $gastos,
             'mes' => $mes,
             'categoria' => $categoria,
+            'cuenta' => $cuenta,
+            'ambito' => $ambito,
+            'cuentas' => $ambito->cuentas($usuario),
             'totalMes' => $totalMes,
             'totalHoy' => $totalHoy,
             'cantidadMes' => $cantidadMes,
@@ -62,78 +72,145 @@ class GastoHormigaController extends Controller
     }
 
     /**
-     * Muestra el formulario para registrar un gasto nuevo.
+     * Formulario de alta dentro del ámbito activo.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
+        $usuario = $request->user();
+        $ambito = Ambito::desde($request, $usuario);
+        $cuentas = $ambito->cuentas($usuario);
+        $general = $cuentas->firstWhere('nombre', 'General') ?? $cuentas->first();
+
         $gasto = new GastoHormiga([
             'fecha' => today(),
             'categoria' => 'Café',
+            'cuenta_id' => $general?->id,
         ]);
 
         return view('gastos.create', [
             'gasto' => $gasto,
             'categorias' => GastoHormiga::CATEGORIAS,
+            'ambito' => $ambito,
+            'cuentas' => $cuentas,
         ]);
     }
 
     /**
-     * Guarda un gasto hormiga recién registrado.
+     * Guarda un gasto en la cuenta y el ámbito elegidos.
      */
     public function store(GastoRequest $request): RedirectResponse
     {
-        GastoHormiga::create($request->validated());
+        $usuario = $request->user();
+        $ambito = Ambito::desde($request, $usuario);
+        $cuenta = $ambito->resolverCuenta($usuario, $request->input('cuenta_id'));
+
+        $datos = $request->safe()->except(['cuenta_id', 'ambito']);
+        $datos['cuenta_id'] = $cuenta->id;
+        $datos['familia_id'] = $cuenta->familia_id;
+
+        $usuario->gastos()->create($datos);
 
         return redirect()
-            ->route('gastos.index')
+            ->route('gastos.index', $ambito->parametros())
             ->with('status', 'Gasto registrado.');
     }
 
     /**
-     * Muestra el detalle de un gasto hormiga.
+     * Detalle de un gasto.
      */
     public function show(GastoHormiga $gasto): View
     {
-        return view('gastos.show', compact('gasto'));
-    }
+        $this->autorizar($gasto);
 
-    /**
-     * Muestra el formulario para editar un gasto existente.
-     */
-    public function edit(GastoHormiga $gasto): View
-    {
-        return view('gastos.edit', [
+        return view('gastos.show', [
             'gasto' => $gasto,
-            'categorias' => GastoHormiga::CATEGORIAS,
+            'ambito' => Ambito::desdeGasto($gasto),
         ]);
     }
 
     /**
-     * Actualiza los datos de un gasto hormiga.
+     * Formulario de edición.
+     */
+    public function edit(GastoHormiga $gasto): View
+    {
+        $this->autorizar($gasto);
+
+        $ambito = Ambito::desdeGasto($gasto);
+
+        return view('gastos.edit', [
+            'gasto' => $gasto,
+            'categorias' => GastoHormiga::CATEGORIAS,
+            'ambito' => $ambito,
+            'cuentas' => $ambito->cuentas(auth()->user()),
+        ]);
+    }
+
+    /**
+     * Actualiza el gasto.
      */
     public function update(GastoRequest $request, GastoHormiga $gasto): RedirectResponse
     {
-        $gasto->update($request->validated());
+        $this->autorizar($gasto);
+
+        $usuario = $request->user();
+        $ambito = Ambito::desdeGasto($gasto);
+        $cuenta = $ambito->resolverCuenta($usuario, $request->input('cuenta_id'));
+
+        $datos = $request->safe()->except(['cuenta_id', 'ambito']);
+        $datos['cuenta_id'] = $cuenta->id;
+        $datos['familia_id'] = $cuenta->familia_id;
+
+        $gasto->update($datos);
 
         return redirect()
-            ->route('gastos.index')
+            ->route('gastos.index', $ambito->parametros())
             ->with('status', 'Gasto actualizado.');
     }
 
     /**
-     * Elimina un gasto hormiga.
+     * Elimina el gasto.
      */
     public function destroy(GastoHormiga $gasto): RedirectResponse
     {
+        $this->autorizar($gasto);
+
+        $ambito = Ambito::desdeGasto($gasto);
         $gasto->delete();
 
         return redirect()
-            ->route('gastos.index')
+            ->route('gastos.index', $ambito->parametros())
             ->with('status', 'Gasto eliminado.');
     }
 
     /**
-     * Devuelve el mes activo (formato "YYYY-MM") o el mes actual.
+     * Un gasto se puede ver si es propio o si es del hogar al que perteneces.
+     */
+    private function autorizar(GastoHormiga $gasto): void
+    {
+        $usuario = auth()->user();
+
+        if ($gasto->familia_id !== null) {
+            abort_unless($usuario->familia()?->id === $gasto->familia_id, 404);
+
+            return;
+        }
+
+        abort_unless($gasto->user_id === $usuario->id, 404);
+    }
+
+    /**
+     * Aplica el filtro de cuenta cuando hay una seleccionada.
+     *
+     * @param  Builder<GastoHormiga>  $consulta
+     * @return Builder<GastoHormiga>
+     */
+    private function conCuenta(Builder $consulta, ?Cuenta $cuenta): Builder
+    {
+        return $cuenta !== null ? $consulta->where('cuenta_id', $cuenta->id) : $consulta;
+    }
+
+    /**
+     * Mes activo (formato "YYYY-MM") o el mes actual.
      */
     private function mesActivo(Request $request): string
     {
@@ -147,7 +224,7 @@ class GastoHormigaController extends Controller
     }
 
     /**
-     * Devuelve la categoría activa o null cuando no es una categoría válida.
+     * Categoría activa o null cuando no es válida.
      */
     private function categoriaActiva(Request $request): ?string
     {
@@ -158,6 +235,20 @@ class GastoHormigaController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * Cuenta activa del ámbito o null.
+     */
+    private function cuentaActiva(Request $request, Ambito $ambito, User $usuario): ?Cuenta
+    {
+        $cuenta = $request->query('cuenta');
+
+        if (! is_string($cuenta) && ! is_int($cuenta)) {
+            return null;
+        }
+
+        return $ambito->cuentas($usuario)->firstWhere('id', (int) $cuenta);
     }
 
     /**

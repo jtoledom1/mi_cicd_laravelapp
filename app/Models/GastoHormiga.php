@@ -6,6 +6,7 @@ use Database\Factories\GastoHormigaFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GastoHormiga extends Model
 {
@@ -31,7 +32,7 @@ class GastoHormiga extends Model
      *
      * @var list<string>
      */
-    protected $fillable = ['descripcion', 'monto', 'categoria', 'fecha', 'notas'];
+    protected $fillable = ['descripcion', 'monto', 'categoria', 'fecha', 'notas', 'cuenta_id', 'familia_id'];
 
     /**
      * Atributos que deben convertirse a tipos nativos.
@@ -73,5 +74,57 @@ class GastoHormiga extends Model
         $categoria = trim((string) $this->categoria);
 
         return in_array($categoria, self::CATEGORIAS, true) ? $categoria : 'Otro';
+    }
+
+    /**
+     * Dueño del gasto.
+     *
+     * @return BelongsTo<User, GastoHormiga>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Hogar al que se cargó el gasto. Si es null, el gasto es personal.
+     *
+     * @return BelongsTo<Familia, GastoHormiga>
+     */
+    public function familia(): BelongsTo
+    {
+        return $this->belongsTo(Familia::class);
+    }
+
+    /**
+     * Cuenta con la que se pagó (el dinero de la abuelita, el gas, la general).
+     *
+     * @return BelongsTo<Cuenta, GastoHormiga>
+     */
+    public function cuenta(): BelongsTo
+    {
+        return $this->belongsTo(Cuenta::class);
+    }
+
+    /**
+     * Solo los gastos personales (sin familia).
+     *
+     * @param  Builder<GastoHormiga>  $query
+     * @return Builder<GastoHormiga>
+     */
+    public function scopePersonales(Builder $query): Builder
+    {
+        return $query->whereNull('familia_id');
+    }
+
+    /**
+     * Solo los gastos compartidos de un hogar.
+     *
+     * @param  Builder<GastoHormiga>  $query
+     * @return Builder<GastoHormiga>
+     */
+    public function scopeDelHogar(Builder $query, int $familiaId): Builder
+    {
+        return $query->where('familia_id', $familiaId);
     }
 }

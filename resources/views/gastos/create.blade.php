@@ -1,24 +1,31 @@
 @extends('layouts.app')
 
-@section('title', 'Anotar un gasto | Gastos Hormiga')
+@section('title', $ambito->esFamilia() ? 'Anotar un gasto de la familia | Gastos Hormiga' : 'Anotar un gasto | Gastos Hormiga')
 
 @section('content')
     @php
         $diario = 30;
         $anual = $diario * 365;
+        $esFamilia = $ambito->esFamilia();
     @endphp
 
     <div class="pagina-form">
         <div class="pagina-form__principal">
-            <a class="volver" href="{{ route('gastos.index') }}">
+            <a class="volver" href="{{ route('gastos.index', $ambito->parametros()) }}">
                 <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
                     <path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
                 </svg>
-                Mis gastos
+                {{ $esFamilia ? 'Gastos del hogar' : 'Mis gastos' }}
             </a>
 
-            <h1 class="titulo-pagina">Anotar un gasto</h1>
-            <p class="bajada">Anota lo de hoy antes de que se te olvide. Los gastos chicos no avisan.</p>
+            <h1 class="titulo-pagina">{{ $esFamilia ? 'Anotar un gasto de la familia' : 'Anotar un gasto' }}</h1>
+            <p class="bajada">
+                @if ($esFamilia)
+                    Lo que anotes aquí queda en {{ $ambito->nombre() }}: lo verá todo el hogar y saldrá de la cuenta que elijas.
+                @else
+                    Anota lo de hoy antes de que se te olvide. Los gastos chicos no avisan.
+                @endif
+            </p>
 
             @include('gastos.partials.form')
         </div>
